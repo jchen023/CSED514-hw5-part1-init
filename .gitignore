@@ -2,10 +2,10 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
+server.txt
 # C extensions
 *.so
-
+debugging trial.py
 # Distribution / packaging
 .Python
 build/
@@ -19,6 +19,7 @@ lib64/
 parts/
 sdist/
 var/
+venv/
 wheels/
 share/python-wheels/
 *.egg-info/

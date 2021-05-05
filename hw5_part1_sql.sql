@@ -35,12 +35,27 @@ Create Table CareGiverSchedule(
 		     REFERENCES AppointmentStatusCodes(StatusCodeId),
 	VaccineAppointmentId int DEFAULT 0 NOT NULL);
 
+
+Create Table Vaccine(
+	Vid INT PRIMARY KEY,
+	VaccineName VARCHAR(50),
+	DateBetweenDoses INT,
+	DoseNeeded INT,
+	capacity INT,
+	MinStorageTemperature FLOAT
+)
+
+INSERT INTO Vaccine (Vid,VaccineName,DateBetweenDoses, DoseNeeded, MinStorageTemperature) VALUES (1, 'Pfizer', 14,2, -60.0),
+(2, 'Moderna', 28,2, -20.0), (3, 'J&J',0, 3, 0.0);
+
+
 -- Additional helper code for your use if needed
 
 -- --- Drop commands to restructure the DB
 -- Drop Table CareGiverSchedule
 -- Drop Table AppointmentStatusCodes
 -- Drop Table Caregivers
+-- DROP TABLE Vaccine
 -- Go
 
 -- --- Commands to clear the active database Tables for unit testing
