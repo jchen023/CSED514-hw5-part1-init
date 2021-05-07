@@ -6,40 +6,40 @@ import pymssql
 class COVID19Vaccine:
     ''' Adds the CareGiver to the DB and adds vaccine scheduling slots '''
     def __init__(self, vaccine, cursor):
-        self.vaccine = vaccine
-
-        if vaccine == "Pfizer":
-            _DateBetweenDoses = 14
-            _DoseNeeded = 2
-            _MaxStorageTemperature = -70
-        elif vaccine == "Moderna":
-            _DateBetweenDoses = 28
-            _DoseNeeded = 2
-            _MaxStorageTemperature = -20
-        elif vaccine == "J&J":
-            _DateBetweenDoses = 0
-            _DoseNeeded = 1
-            _MaxStorageTemperature = 90
-        elif vaccine == "AstraZeneca":
-            _DateBetweenDoses = 30
-            _DoseNeeded = 2
-            _MaxStorageTemperature = 36
-        else:
-            _DateBetweenDoses = -1
-            _DoseNeeded = -1
-            _MaxStorageTemperature = -10000
-
-
-        self.sqltext = \
-            "INSERT INTO Vaccine (VaccineName, DateBetweenDoses, DoseNeeded, MaxStorageTemperature) VALUES ('%s', %d, %d, %d);" % (
-                self.vaccine,
-                _DateBetweenDoses,
-                _DoseNeeded,
-                _MaxStorageTemperature
-            )
-        print(self.sqltext)
-        self.vid = 0
         try:
+            self.vaccine = vaccine.title()
+
+            if vaccine == "Pfizer":
+                _DateBetweenDoses = 14
+                _DoseNeeded = 2
+                _MaxStorageTemperature = -70
+            elif vaccine == "Moderna":
+                _DateBetweenDoses = 28
+                _DoseNeeded = 2
+                _MaxStorageTemperature = -20
+            elif vaccine == "J&J":
+                _DateBetweenDoses = 0
+                _DoseNeeded = 1
+                _MaxStorageTemperature = 90
+            elif vaccine == "AstraZeneca":
+                _DateBetweenDoses = 30
+                _DoseNeeded = 2
+                _MaxStorageTemperature = 36
+            else:
+                raise NameError("Please Add Pfizer, Moderna, J&J or AstraZeneca. For other vaccine, please contact customer service at (425) 949-2302")
+                _DateBetweenDoses = -1
+                _DoseNeeded = -1
+                _MaxStorageTemperature = -10000
+
+            self.sqltext = \
+                "INSERT INTO Vaccine (VaccineName, DateBetweenDoses, DoseNeeded, MaxStorageTemperature) VALUES ('%s', %d, %d, %d);" % (
+                    self.vaccine,
+                    _DateBetweenDoses,
+                    _DoseNeeded,
+                    _MaxStorageTemperature
+                )
+            self.vid = 0
+
             cursor.execute(self.sqltext)
             cursor.connection.commit()
             cursor.execute("SELECT @@IDENTITY AS 'Identity'; ")

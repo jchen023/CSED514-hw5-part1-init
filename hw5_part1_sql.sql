@@ -56,7 +56,7 @@ Create Table Patient(
 );
 
 Create Table VaccineAppointment(
-	VaccineAppointmentId INT PRIMARY KEY,
+	VaccineAppointmentId INT Identity PRIMARY KEY,
 	PatientId INT REFERENCES Patient(PatientId),
 	CaregiverId INT REFERENCES Caregivers(CareGiverId),
 	Vid INT REFERENCES Vaccine,
@@ -68,14 +68,14 @@ END
 EXEC InitDataModel;
 -- Additional helper code for your use if needed
 
--- --- Drop commands to restructure the DB
--- DROP TABLE VaccineAppointment
--- DROP TABLE Patient
--- DROP TABLE Vaccine
--- Drop Table CareGiverSchedule
--- Drop Table AppointmentStatusCodes
--- Drop Table Caregivers
--- Drop PROCEDURE InitDataModel
+-- Drop commands to restructure the DB
+DROP TABLE VaccineAppointment
+DROP TABLE Patient
+Drop Table CareGiverSchedule
+Drop Table AppointmentStatusCodes
+DROP TABLE Vaccine
+Drop Table Caregivers
+Drop PROCEDURE InitDataModel
 
 select * from Vaccine
 
