@@ -9,13 +9,13 @@ class VaccineCaregiver:
         _hoursToSchedlue = [10,11]
         _appointmentDuration = 15
         self.sqltext = "INSERT INTO CareGivers (CaregiverName) VALUES ('" + name + "')"
-        self.caregiverId = 0 // cid=0
+        self.caregiverId = 0
         try: 
             cursor.execute(self.sqltext)
             cursor.connection.commit()
             cursor.execute("SELECT @@IDENTITY AS 'Identity'; ")
-            _identityRow = cursor.fetchone() //cid=0
-            self.caregiverId = _identityRow['Identity'] #cid=0
+            _identityRow = cursor.fetchone()
+            self.caregiverId = _identityRow['Identity']
             # cursor.connection.commit()
             print('Query executed successfully. Caregiver : ' + name 
             +  ' added to the database using Caregiver ID = ' + str(self.caregiverId))
