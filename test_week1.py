@@ -10,10 +10,10 @@ class TestVaccineFunction(unittest.TestCase):
 
     def testVaccine_init(self):
         try:
-            with self.connection_manager = SqlConnectionManager(Server=os.getenv("Server"),
-                                        DBname=os.getenv("DBName"),
-                                        UserId=os.getenv("UserID"),
-                                        Password=os.getenv("Password")) as sqlClient:
+            with SqlConnectionManager(Server=os.getenv("Server"),
+                                      DBname=os.getenv("DBName"),
+                                      UserId=os.getenv("UserID"),
+                                      Password=os.getenv("Password")) as sqlClient:
                 with sqlClient.cursor(as_dict=True) as cursor:
                     try:
                         # clear the tables before testing
@@ -43,7 +43,7 @@ class TestVaccineFunction(unittest.TestCase):
 
     def testAdd_dose(self):
         try:
-            with self.connection_manager = SqlConnectionManager(Server=os.getenv("Server"),
+            with SqlConnectionManager(Server=os.getenv("Server"),
                                         DBname=os.getenv("DBName"),
                                         UserId=os.getenv("UserID"),
                                         Password=os.getenv("Password")) as sqlClient:
@@ -77,10 +77,10 @@ class TestVaccineFunction(unittest.TestCase):
 
     def testReserve_dose(self):
         try:
-            with self.connection_manager = SqlConnectionManager(Server=os.getenv("Server"),
-                                        DBname=os.getenv("DBName"),
-                                        UserId=os.getenv("UserID"),
-                                        Password=os.getenv("Password")) as sqlClient:
+            with SqlConnectionManager(Server=os.getenv("Server"),
+                                      DBname=os.getenv("DBName"),
+                                      UserId=os.getenv("UserID"),
+                                      Password=os.getenv("Password")) as sqlClient:
                 with sqlClient.cursor(as_dict=True) as cursor:
                     try:
                         # clear the tables before testing
