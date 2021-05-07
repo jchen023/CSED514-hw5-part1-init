@@ -1,5 +1,4 @@
--- Given CREATE TABLE statements to start your database
-
+-- Given CREATE TABLE statements to start your databas
 Create Table Caregivers(
 	CaregiverId int IDENTITY PRIMARY KEY,
 	CaregiverName varchar(50)
@@ -35,12 +34,59 @@ Create Table CareGiverSchedule(
 		     REFERENCES AppointmentStatusCodes(StatusCodeId),
 	VaccineAppointmentId int DEFAULT 0 NOT NULL);
 
+
+Create Table Vaccine(
+	Vid INT Identity,
+	CaregiverId INT REFERENCES Caregivers(CaregiverId),
+	VaccineName VARCHAR(50),
+	DateBetweenDoses INT,
+	DoseNeeded INT,
+	MinStorageTemperature FLOAT,
+	Inventory INT DEFAULT 0 NOT NULL
+	Primary Key (CaregiverId, Vid)
+);
+
+
+Create Table Patient(
+	PatientId INT Primary Key,
+	PatientName VARCHAR(50),
+	Zipcode INT,
+	Phone VARCHAR(15),
+	DOB DATE
+);
+
+Create Table VaccineAppointment(
+	VaccineAppointmentId INT PRIMARY KEY,
+	PatientId INT REFERENCES Patient(PatientId),
+	CaregiverId INT REFERENCES Caregivers(CareGiverId),
+	Vid INT REFERENCES Vaccine,
+	DoseNumber INT DEFAULT 1
+);
+
+
+
+-- INSERT INTO Vaccine (Vid,VaccineName,DateBetweenDoses, DoseNeeded, MinStorageTemperature) VALUES (1, 'Pfizer', 14, 2, -60.0),
+-- (2, 'Moderna', 28,2, -20.0), (3, 'J&J',0, 1, 0.0);
+
+
+
+-- Update vaccine set DoseNeeded = DoseNeeded + 2
+
+-- select * from vaccine
+
 -- Additional helper code for your use if needed
 
 -- --- Drop commands to restructure the DB
+-- DROP TABLE VaccineAppointment
+-- DROP TABLE Patient
+-- DROP TABLE VaccineInventory
+-- DROP TABLE Vaccine
 -- Drop Table CareGiverSchedule
 -- Drop Table AppointmentStatusCodes
 -- Drop Table Caregivers
+
+
+
 -- Go
 
 -- --- Commands to clear the active database Tables for unit testing
@@ -48,6 +94,7 @@ Create Table CareGiverSchedule(
 -- DBCC CHECKIDENT ('CareGiverSchedule', RESEED, 0)
 -- Delete From Caregivers
 -- DBCC CHECKIDENT ('Caregivers', RESEED, 0)
+<<<<<<< HEAD
 -- GO
 
 -------------------------------------------------------
@@ -68,3 +115,6 @@ Create Table CareGiverSchedule(
 
 -- INSERT INTO Vaccine (Vid,VaccineName,DateBetweenDoses, DoseNeeded, MinStorageTemperature) VALUES (1, 'Pfizer', 14, 2, -60.0),
 -- (2, 'Moderna', 28,2, -20.0), (3, 'J&J',0, 3, 0.0);
+=======
+-- GO
+>>>>>>> 895877ec97444b169ed840bdd9089676694f81b3

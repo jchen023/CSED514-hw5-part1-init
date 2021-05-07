@@ -62,10 +62,21 @@ class VaccineReservationScheduler:
             return -1
 
 if __name__ == '__main__':
-        with SqlConnectionManager(Server=os.getenv("Server"),
-                                  DBname=os.getenv("DBName"),
-                                  UserId=os.getenv("UserID"),
-                                  Password=os.getenv("Password")) as sqlClient:
+        # with SqlConnectionManager(Server=os.getenv("Server"),
+        #                           DBname=os.getenv("DBName"),
+        #                           UserId=os.getenv("UserID"),
+        #                           Password=os.getenv("Password")) as sqlClient:
+
+        with SqlConnectionManager(Server="jchen023.database.windows.net",
+                                  DBname="DATA_514_DB",
+                                  UserId='jchen023',
+                                  Password="Data5142021") as sqlClient:
+
+        # with SqlConnectionManager(Server="data514server-sp.database.windows.net",
+        #                           DBname="DATA514dbMain",
+        #                           UserId='sampereb',
+        #                           Password="Data514HW") as sqlClient:
+
             clear_tables(sqlClient)
             vrs = VaccineReservationScheduler()
 
