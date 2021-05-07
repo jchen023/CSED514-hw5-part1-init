@@ -93,7 +93,7 @@ if __name__ == '__main__':
                 caregivers[cgid] = cg
             a = covid('Moderna', dbcursor)
             b = covid('J&J', dbcursor)
-            a.AddDoses(6, dbcursor)
+            a.AddDoses(-6, dbcursor)
             b.ReserveDoses(7, dbcursor)
             c = covid('hello world', dbcursor)
             # Add a vaccine and Add doses to inventory of the vaccine

@@ -17,7 +17,7 @@ class COVID19Vaccine:
                 _DateBetweenDoses = 28
                 _DoseNeeded = 2
                 _MaxStorageTemperature = -20
-            elif vaccine == "J&J":
+            elif vaccine in "J&J":
                 _DateBetweenDoses = 0
                 _DoseNeeded = 1
                 _MaxStorageTemperature = 90
@@ -26,7 +26,7 @@ class COVID19Vaccine:
                 _DoseNeeded = 2
                 _MaxStorageTemperature = 36
             else:
-                raise NameError("Please Add Pfizer, Moderna, J&J or AstraZeneca. For other vaccine, please contact customer service at (425) 949-2302")
+                raise NameError()
                 _DateBetweenDoses = -1
                 _DoseNeeded = -1
                 _MaxStorageTemperature = -10000
@@ -48,6 +48,8 @@ class COVID19Vaccine:
             cursor.connection.commit()
             print('Query executed successfully. Vaccine : ' + self.vaccine
                   + ' added to the database using Vaccine ID = ' + str(self.vid))
+        except NameError:
+            print("Please Add Pfizer, Moderna, J&J or AstraZeneca. For other vaccine, please contact customer service MARK FRIEDMAN at (425) 949-2302")
         except pymssql.Error as db_err:
             print("Database Programming Error in SQL Query processing for COVID VACCINE! ")
             print("Exception code: " + str(db_err.args[0]))
@@ -63,9 +65,13 @@ class COVID19Vaccine:
                 self.vid
             )
         try:
+            if doses <= 0:
+                raise ValueError()
             cursor.execute(self.sqltext)
             cursor.connection.commit()
             print('Query executed successfully. Dose Added')
+        except ValueError as e:
+            print("Please add a positive integer. VACCINE NOT ADDED")
         except pymssql.Error as db_err:
             print("Database Programming Error in SQL Query processing for COVID VACCINE (ADD DOSE)! ")
             print("Exception code: " + str(db_err.args[0]))
@@ -80,11 +86,15 @@ class COVID19Vaccine:
                 self.vid
             )
         try:
+            if doses <= 0:
+                raise ValueError()
             cursor.execute(self.sqltext)
             cursor.connection.commit()
             print('Query executed successfully. Dose Deleted')
+        except ValueError as e:
+            print("Please add a positive integer. VACCINE NOT RESERVED")
         except pymssql.Error as db_err:
-            print("Database Programming Error in SQL Query processing for COVID VACCINE (Delete DOSE)! ")
+            print("Database Programming Error in SQL Query processing for COVID VACCINE (RESERVE DOSE)! ")
             print("Exception code: " + str(db_err.args[0]))
             if len(db_err.args) > 1:
                 print("Exception message: " + db_err.args[1])
