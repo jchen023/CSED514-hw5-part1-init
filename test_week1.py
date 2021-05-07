@@ -7,7 +7,6 @@ from enums import *
 from utils import *
 
 class TestVaccineFunction(unittest.TestCase):
-
     def testVaccine_init(self):
         try:
             with SqlConnectionManager(Server=os.getenv("Server"),
