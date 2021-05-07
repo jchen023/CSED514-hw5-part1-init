@@ -64,12 +64,13 @@ Create Table VaccineAppointment(
 );
 
 END
+
+EXEC InitDataModel;
 -- Additional helper code for your use if needed
 
 -- --- Drop commands to restructure the DB
 -- DROP TABLE VaccineAppointment
 -- DROP TABLE Patient
--- DROP TABLE VaccineInventory
 -- DROP TABLE Vaccine
 -- Drop Table CareGiverSchedule
 -- Drop Table AppointmentStatusCodes
