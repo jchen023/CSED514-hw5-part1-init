@@ -36,14 +36,12 @@ Create Table CareGiverSchedule(
 
 
 Create Table Vaccine(
-	Vid INT Identity,
-	CaregiverId INT REFERENCES Caregivers(CaregiverId),
+	Vid INT Identity PRIMARY KEY,
 	VaccineName VARCHAR(50),
 	DateBetweenDoses INT,
 	DoseNeeded INT,
-	MinStorageTemperature FLOAT,
+	MaxStorageTemperature FLOAT,
 	Inventory INT DEFAULT 0 NOT NULL
-	Primary Key (CaregiverId, Vid)
 );
 
 
@@ -64,16 +62,6 @@ Create Table VaccineAppointment(
 );
 
 
-
--- INSERT INTO Vaccine (Vid,VaccineName,DateBetweenDoses, DoseNeeded, MinStorageTemperature) VALUES (1, 'Pfizer', 14, 2, -60.0),
--- (2, 'Moderna', 28,2, -20.0), (3, 'J&J',0, 1, 0.0);
-
-
-
--- Update vaccine set DoseNeeded = DoseNeeded + 2
-
--- select * from vaccine
-
 -- Additional helper code for your use if needed
 
 -- --- Drop commands to restructure the DB
@@ -85,7 +73,7 @@ Create Table VaccineAppointment(
 -- Drop Table AppointmentStatusCodes
 -- Drop Table Caregivers
 
-
+select * from Vaccine
 
 -- Go
 
