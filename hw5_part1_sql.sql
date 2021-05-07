@@ -49,3 +49,22 @@ Create Table CareGiverSchedule(
 -- Delete From Caregivers
 -- DBCC CHECKIDENT ('Caregivers', RESEED, 0)
 -- GO
+
+-------------------------------------------------------
+-- Create Table Vaccine(
+-- 	Vid INT PRIMARY KEY,
+-- 	VaccineName VARCHAR(50),
+-- 	DateBetweenDoses INT,
+-- 	DoseNeeded INT,
+-- 	MinStorageTemperature FLOAT
+-- );
+
+-- Create Table VaccineInventory(
+-- 	Cid INT REFERENCES Caregivers(CaregiverId),
+-- 	Vid INT REFERENCES Vaccine(Vid),
+-- 	Inventory INT DEFAULT 0 NOT NULL,
+-- 	Primary Key (Cid, Vid)
+-- );
+
+-- INSERT INTO Vaccine (Vid,VaccineName,DateBetweenDoses, DoseNeeded, MinStorageTemperature) VALUES (1, 'Pfizer', 14, 2, -60.0),
+-- (2, 'Moderna', 28,2, -20.0), (3, 'J&J',0, 3, 0.0);

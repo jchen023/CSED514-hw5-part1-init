@@ -16,6 +16,7 @@ class TestDB(unittest.TestCase):
                                                            DBname=os.getenv("DBName"),
                                                            UserId=os.getenv("UserID"),
                                                            Password=os.getenv("Password"))
+
             self.conn = self.connection_manager.Connect()
         except Exception:
             self.fail("Connection to databse failed")
