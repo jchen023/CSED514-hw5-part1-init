@@ -107,6 +107,41 @@ class TestVaccineFunction(unittest.TestCase):
                     clear_tables(sqlClient)
                     self.fail("Adding doses failed")
 
+    def testAdd_negative_dose(self):
+
+        with SqlConnectionManager(Server=os.getenv("Server"),
+                                  DBname=os.getenv("DBName"),
+                                  UserId=os.getenv("UserID"),
+                                  Password=os.getenv("Password")) as sqlClient:
+            with sqlClient.cursor(as_dict=True) as cursor:
+                try:
+                    # clear the tables before testing
+                    clear_tables(sqlClient)
+                    # create a new VaccineCaregiver object
+                    self.vaccine_a = covid(vaccine="Moderna",
+                                                    cursor=cursor)
+                    # check if the patient is correctly inserted into the database
+                    sqlQuery = '''
+                                SELECT Inventory
+                                FROM Vaccine
+                                WHERE VaccineName = 'Moderna'
+                                '''
+
+                    self.vaccine_a.AddDoses(-4, cursor)
+
+                    cursor.execute(sqlQuery)
+                    rows = cursor.fetchall()
+
+
+                    if rows[0]['Inventory'] != 0:
+                        self.fail("Adding negative # of doses failed")
+
+                    clear_tables(sqlClient)
+                except Exception:
+                    # clear the tables if an exception occurred
+                    clear_tables(sqlClient)
+                    self.fail("Adding negative # of doses failed")
+
     def testReserve_dose(self):
 
         with SqlConnectionManager(Server=os.getenv("Server"),
@@ -142,6 +177,41 @@ class TestVaccineFunction(unittest.TestCase):
                     # clear the tables if an exception occurred
                     clear_tables(sqlClient)
                     self.fail("Reserving doses failed")
+
+    def testReserve_negative_doses(self):
+
+        with SqlConnectionManager(Server=os.getenv("Server"),
+                                  DBname=os.getenv("DBName"),
+                                  UserId=os.getenv("UserID"),
+                                  Password=os.getenv("Password")) as sqlClient:
+            with sqlClient.cursor(as_dict=True) as cursor:
+                try:
+                    # clear the tables before testing
+                    clear_tables(sqlClient)
+                    # create a new VaccineCaregiver object
+                    self.vaccine_a = covid(vaccine="AstraZeneca",
+                                           cursor=cursor)
+                    # check if the patient is correctly inserted into the database
+                    sqlQuery = '''
+                                SELECT Inventory
+                                FROM Vaccine
+                                WHERE VaccineName = 'AstraZeneca'
+                                '''
+
+                    self.vaccine_a.AddDoses(4, cursor)
+                    self.vaccine_a.ReserveDoses(-2, cursor)
+
+                    cursor.execute(sqlQuery)
+                    rows = cursor.fetchall()
+
+                    if rows[0]['Inventory'] != 4:
+                        self.fail("Reserving negative # of doses failed")
+
+                    clear_tables(sqlClient)
+                except Exception:
+                    # clear the tables if an exception occurred
+                    clear_tables(sqlClient)
+                    self.fail("Reserving negative # of doses failed")
     
     
     def testTemp_doseAZ(self):
