@@ -1,6 +1,7 @@
 from datetime import datetime
 from datetime import timedelta
-from COVID19_vaccine import
+from COVID19_vaccine import COVID19Vaccine
+import vaccine_caregiver
 import pymssql
 
 
