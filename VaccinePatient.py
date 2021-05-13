@@ -5,12 +5,12 @@ import pymssql
 
 
 class VaccinePatient:
-    def __init__(self, PatientName, VaccineStatus, cursor):
+    def __init__(self, PatientName, PatientStatusCode, cursor):
         try:
             self.sqltext = \
                 "INSERT INTO Patients (PatientName, VaccineStatus) VALUES ('%s', %d);" % (
                     PatientName,
-                    VaccineStatus
+                    PatientStatusCode
                 )
             self.PatientId = 0
             self.PatientName = PatientName
