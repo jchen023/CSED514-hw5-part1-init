@@ -42,7 +42,7 @@ class VaccineReservationScheduler:
         '''method that marks a slot on Hold with a definite reservation  
         slotid is the slot that is currently on Hold and whose status will be updated 
         returns the same slotid when the database update succeeds 
-        returns 0 is there if the database update dails 
+        returns 0 is there if the database update fails
         returns -1 the same slotid when the database command fails
         returns 21 if the slotid parm is invalid '''
         # Note to students: this is a stub that needs to replaced with your code

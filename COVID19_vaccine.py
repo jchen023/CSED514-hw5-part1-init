@@ -4,7 +4,7 @@ import pymssql
 
 
 class COVID19Vaccine:
-    ''' Adds the CareGiver to the DB and adds vaccine scheduling slots '''
+
     def __init__(self, vaccine, cursor):
         try:
             self.vaccine = vaccine.title()
