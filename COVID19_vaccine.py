@@ -12,19 +12,19 @@ class COVID19Vaccine:
             if vaccine == "Pfizer":
                 _DateBetweenDoses = 14
                 _DoseNeeded = 2
-                _MaxStorageTemperature = -70
+                _TotalDoses = 0
             elif vaccine == "Moderna":
                 _DateBetweenDoses = 28
                 _DoseNeeded = 2
-                _MaxStorageTemperature = -20
+                _TotalDoses = 0
             elif vaccine in "J&J":
                 _DateBetweenDoses = 0
                 _DoseNeeded = 1
-                _MaxStorageTemperature = 90
+                _TotalDoses = 0
             elif vaccine == "AstraZeneca":
                 _DateBetweenDoses = 30
                 _DoseNeeded = 2
-                _MaxStorageTemperature = 36
+                _TotalDoses = 0
             else:
                 raise NameError()
                 _DateBetweenDoses = -1
@@ -32,11 +32,11 @@ class COVID19Vaccine:
                 _MaxStorageTemperature = -10000
 
             self.sqltext = \
-                "INSERT INTO Vaccine (VaccineName, DateBetweenDoses, DoseNeeded, MaxStorageTemperature) VALUES ('%s', %d, %d, %d);" % (
+                "INSERT INTO Vaccines (VaccineName, DaysBetweenDoses, DosesPerPatient, TotalDoses) VALUES ('%s', %d, %d, %d);" % (
                     self.vaccine,
                     _DateBetweenDoses,
                     _DoseNeeded,
-                    _MaxStorageTemperature
+                    _TotalDoses
                 )
             self.vid = 0
 
@@ -60,9 +60,9 @@ class COVID19Vaccine:
 
     def AddDoses(self, doses, cursor):
         self.sqltext = \
-            "Update Vaccine Set Inventory = Inventory +  %d Where Vid = %d" % (
+            "Update Vaccines Set TotalDoses = TotalDoses +  %d Where VaccineName = %s" % (
                 doses,
-                self.vid
+                self.vaccine
             )
         try:
             if doses <= 0:

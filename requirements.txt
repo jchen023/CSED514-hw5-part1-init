@@ -1,8 +1,2 @@
-<<<<<<< HEAD
 pymssql==2.1.5
 unittest2
-pyodbc
-=======
-pymssql==2.1.5
-unittest2
->>>>>>> 895877ec97444b169ed840bdd9089676694f81b3
