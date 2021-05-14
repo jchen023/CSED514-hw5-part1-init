@@ -59,8 +59,12 @@ class COVID19Vaccine:
 
 
     def AddDoses(self, doses, cursor):
+        
         self.sqltext = \
-            "Update Vaccines Set TotalDoses = TotalDoses +  %d Where VaccineName = %s" % (
+            "Update Vaccines Set TotalDoses = TotalDoses +  %d Where VaccineName = '%s' " % (
+                doses,
+                self.vaccine
+            ) + "; Update Vaccines Set AvailableDoses = AvailableDoses + %d Where VaccineName = '%s'" % (
                 doses,
                 self.vaccine
             )
@@ -69,6 +73,7 @@ class COVID19Vaccine:
                 raise ValueError()
             cursor.execute(self.sqltext)
             cursor.connection.commit()
+
             print('Query executed successfully. Dose Added')
         except ValueError as e:
             print("Please add a positive integer. VACCINE NOT ADDED")
@@ -81,9 +86,12 @@ class COVID19Vaccine:
 
     def ReserveDoses(self, doses, cursor):
         self.sqltext = \
-            "Update Vaccine Set Available = Available -  %d Where Vid = %d" % (
+            "Update Vaccines Set TotalDoses = TotalDoses -  %d Where VaccineName = '%s'" % (
                 doses,
-                self.vid
+                self.vaccine
+            ) + "; Update Vaccines Set AvailableDoses = AvailableDoses - %d Where VaccineName = '%s'" % (
+                doses,
+                self.vaccine
             )
         try:
             if doses <= 0:

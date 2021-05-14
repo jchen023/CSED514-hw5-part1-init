@@ -161,8 +161,8 @@ class TestVaccineFunction(unittest.TestCase):
                                                     cursor=cursor)
                     # check if the patient is correctly inserted into the database
                     sqlQuery = '''
-                                SELECT Inventory
-                                FROM Vaccine
+                                SELECT TotalDoses
+                                FROM Vaccines
                                 WHERE VaccineName = 'AstraZeneca'
                                 '''
 
@@ -173,7 +173,7 @@ class TestVaccineFunction(unittest.TestCase):
                     rows = cursor.fetchall()
 
 
-                    if rows[0]['Inventory'] != 2:
+                    if rows[0]['TotalDoses'] != 2:
                         self.fail("Reserving doses failed")
 
                     clear_tables(sqlClient)
