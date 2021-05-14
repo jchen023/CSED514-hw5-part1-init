@@ -125,4 +125,4 @@ if __name__ == '__main__':
             # Schedule the patients
             
             # Test cases done!
-            clear_tables(sqlClient)
+            # clear_tables(sqlClient)

@@ -34,15 +34,34 @@ class VaccinePatient:
 
     def ReserveAppointment(self, CaregiverSchedulingID, Vaccine, cursor):
         try:
-            sqltext = ("select SlotStatus from CareGiverSchedule where CaregiverSlotSchedulingId = %d"
+            # Checking if the slot is on hold
+            sqltext = ("select * from CareGiverSchedule where CaregiverSlotSchedulingId = %d"
                        % (CaregiverSchedulingID))
             cursor.execute(sqltext)
-            slotStatus = cursor.fetchone()['SlotStatus']
+            caregiver_result = cursor.fetchone()
+            slotStatus = caregiver_result['SlotStatus']
             if slotStatus != 1:
                 raise ValueError()
 
-            sqltext = "select "
+            # Reserving Vaccine Doses
+            sqltext = "select DosesPerPatient from vaccine where vaccine = {}".format(Vaccine.vaccine)
+            cursor.execute(sqltext)
+            dosesPerPatient = cursor["DosesPerPatient"]
+            Vaccine.reserve(dosesPerPatient, cursor)
 
+            # Initial Entry in the Vaccine Appointment Table
+            VaccineName = Vaccine.vaccine
+            PatientId = self.PatientId
+            CaregiverId = caregiver_result['CaregiverId']
+            ReservationDate = caregiver_result['WorkDay']
+            ReservationStartHour = caregiver_result["SlotHour"]
+            ReservationStartMinute = caregiver_result["SlotMinute"]
+            AppointmentDuration = 15
+            SlotStatus = 2
+            DoseNumber = 1
+
+        # self.firstAppointmentId
+        # self.secondAppointmentId
 
         except ValueError:
             print("The slot is not currently on hold...")
