@@ -35,7 +35,7 @@ class VaccineReservationScheduler:
             #
 
             if rows:
-                print(str(rows['CaregiverSlotSchedulingId']))
+                #print(str(rows['CaregiverSlotSchedulingId']))
                 sqlText = "Update CareGiverSchedule Set SlotStatus = 1 WHERE CaregiverSlotSchedulingId =" + \
                           str(rows['CaregiverSlotSchedulingId']) + ";"
                 cursor.execute(sqlText)
@@ -56,17 +56,35 @@ class VaccineReservationScheduler:
         '''method that marks a slot on Hold with a definite reservation  
         slotid is the slot that is currently on Hold and whose status will be updated 
         returns the same slotid when the database update succeeds 
-        returns 0 is there if the database update fails
+        returns -2 is there if the database update fails
         returns -1 the same slotid when the database command fails
         returns 21 if the slotid parm is invalid '''
         # Note to students: this is a stub that needs to replaced with your code
-        if slotid < 1:
+        if slotid < 0:
             return -2
         self.slotSchedulingId = slotid
-        self.getAppointmentSQL = "SELECT something... "
+        
+        self.getAppointmentSQL = "SELECT * FROM CareGiverSchedule WHERE SlotStatus = 1 AND CaregiverSlotSchedulingId =" + str(self.slotSchedulingId) + ";"
+        
         try:
             cursor.execute(self.getAppointmentSQL)
+            rows = cursor.fetchone()
+
+            if (rows):
+                sqlText = "Update CareGiverSchedule Set SlotStatus = 2 WHERE CaregiverSlotSchedulingId =" + \
+                          str(self.slotSchedulingId) + ";"
+                cursor.execute(sqlText)
+                cursor.connection.commit()
+                #print('we reserve')
+
+            else:
+                print('Invalid SlotID')
+                self.slotSchedulingId = 21
+
+
+
             return self.slotSchedulingId
+
         except pymssql.Error as db_err:    
             print("Database Programming Error in SQL Query processing! ")
             print("Exception code: " + db_err.args[0])
@@ -81,17 +99,17 @@ if __name__ == '__main__':
         #                           UserId=os.getenv("UserID"),
         #                           Password=os.getenv("Password")) as sqlClient:
 
-        with SqlConnectionManager(Server="jchen023.database.windows.net",
-                                  DBname="DATA_514_DB",
-                                  UserId='jchen023',
-                                  Password="Data5142021") as sqlClient:
+        # with SqlConnectionManager(Server="jchen023.database.windows.net",
+        #                           DBname="DATA_514_DB",
+        #                           UserId='jchen023',
+        #                           Password="Data5142021") as sqlClient:
 
-        # with SqlConnectionManager(Server="data514server-sp.database.windows.net",
-        #                           DBname="DATA514dbMain",
-        #                           UserId='sampereb',
-        #                           Password="Data514HW") as sqlClient:
+        with SqlConnectionManager(Server="data514server-sp.database.windows.net",
+                                  DBname="DATA514dbMain",
+                                  UserId='sampereb',
+                                  Password="Data514HW") as sqlClient:
 
-            clear_tables(sqlClient)
+            #clear_tables(sqlClient)
             vrs = VaccineReservationScheduler()
 
             # get a cursor from the SQL connection
@@ -107,9 +125,11 @@ if __name__ == '__main__':
                 cgid = cg.caregiverId
                 caregivers[cgid] = cg
 
-            # tester = VaccineReservationScheduler()
-            # tester.PutHoldOnAppointmentSlot(dbcursor)
-            # print('check the tables')
+            tester = VaccineReservationScheduler()
+            #tester.PutHoldOnAppointmentSlot(dbcursor)
+            tester.PutHoldOnAppointmentSlot(dbcursor)
+            tester.ScheduleAppointmentSlot(2, dbcursor)
+            #print('check the tables')
 
             # a = covid('Moderna', dbcursor)
             # b = covid('J&J', dbcursor)
@@ -117,12 +137,12 @@ if __name__ == '__main__':
             # b.ReserveDoses(7, dbcursor)
             # c = covid('hello world', dbcursor)
 
-            p1 = patient('Mark Friedman', 0, dbcursor_1)
-            p1.ReserveAppointment(0, 'Moderna', dbcursor_1)
+            # p1 = patient('Mark Friedman', 0, dbcursor_1)
+            # p1.ReserveAppointment(0, 'Moderna', dbcursor_1)
 
             # Add a vaccine and Add doses to inventory of the vaccine
             # Ass patients
             # Schedule the patients
             
             # Test cases done!
-            # clear_tables(sqlClient)
+            clear_tables(sqlClient)
