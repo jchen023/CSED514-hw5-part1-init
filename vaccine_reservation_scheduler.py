@@ -20,13 +20,29 @@ class VaccineReservationScheduler:
     def PutHoldOnAppointmentSlot(self, cursor):
         ''' Method that reserves a CareGiver appointment slot &
         returns the unique scheduling slotid
-        Should return 0 if no slot is available  or -1 if there is a database error'''
+        Should return -2 if no slot is available  or -1 if there is a database error'''
+
         # Note to students: this is a stub that needs to replaced with your code
-        self.slotSchedulingId = 0
-        self.getAppointmentSQL = "SELECT something..."
+
+        # replacing 0 with -2 to cover edge case
+        #  
+        self.slotSchedulingId = -2
+        self.getAppointmentSQL = "SELECT * FROM CareGiverSchedule WHERE SlotStatus = 0;"
         try:
             cursor.execute(self.getAppointmentSQL)
-            cursor.connection.commit()
+            rows = cursor.fetchone()
+            self.slotSchedulingId = rows['CaregiverSlotSchedulingId']
+            #
+
+            if (len(rows) != 0):
+                print(str(rows['CaregiverSlotSchedulingId']))
+                sqlText = "Update CareGiverSchedule Set SlotStatus = 1 WHERE CaregiverSlotSchedulingId =" + str(rows['CaregiverSlotSchedulingId']) + ";"
+                cursor.execute(sqlText)
+                cursor.connection.commit()
+                
+            
+            #cursor.connection.commit()
+
             return self.slotSchedulingId
         
         except pymssql.Error as db_err:
@@ -67,17 +83,17 @@ if __name__ == '__main__':
         #                           UserId=os.getenv("UserID"),
         #                           Password=os.getenv("Password")) as sqlClient:
 
-        with SqlConnectionManager(Server="jchen023.database.windows.net",
-                                  DBname="DATA_514_DB",
-                                  UserId='jchen023',
-                                  Password="Data5142021") as sqlClient:
+        # with SqlConnectionManager(Server="jchen023.database.windows.net",
+        #                           DBname="DATA_514_DB",
+        #                           UserId='jchen023',
+        #                           Password="Data5142021") as sqlClient:
 
-        # with SqlConnectionManager(Server="data514server-sp.database.windows.net",
-        #                           DBname="DATA514dbMain",
-        #                           UserId='sampereb',
-        #                           Password="Data514HW") as sqlClient:
+        with SqlConnectionManager(Server="data514server-sp.database.windows.net",
+                                  DBname="DATA514dbMain",
+                                  UserId='sampereb',
+                                  Password="Data514HW") as sqlClient:
 
-            clear_tables(sqlClient)
+            #clear_tables(sqlClient)
             vrs = VaccineReservationScheduler()
 
             # get a cursor from the SQL connection
@@ -91,11 +107,17 @@ if __name__ == '__main__':
             for cg in caregiversList:
                 cgid = cg.caregiverId
                 caregivers[cgid] = cg
-            a = covid('Moderna', dbcursor)
-            b = covid('J&J', dbcursor)
-            a.AddDoses(-6, dbcursor)
-            b.ReserveDoses(7, dbcursor)
-            c = covid('hello world', dbcursor)
+
+            # tester = VaccineReservationScheduler()
+            # tester.PutHoldOnAppointmentSlot(dbcursor)
+            # print('check the tables')
+
+            # a = covid('Moderna', dbcursor)
+            # b = covid('J&J', dbcursor)
+            # a.AddDoses(-6, dbcursor)
+            # b.ReserveDoses(7, dbcursor)
+            # c = covid('hello world', dbcursor)
+            
             # Add a vaccine and Add doses to inventory of the vaccine
             # Ass patients
             # Schedule the patients
