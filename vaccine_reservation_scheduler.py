@@ -32,10 +32,8 @@ class VaccineReservationScheduler:
             cursor.execute(self.getAppointmentSQL)
             rows = cursor.fetchone()
             self.slotSchedulingId = rows['CaregiverSlotSchedulingId']
-            #
 
             if rows:
-                #print(str(rows['CaregiverSlotSchedulingId']))
                 sqlText = "Update CareGiverSchedule Set SlotStatus = 1 WHERE CaregiverSlotSchedulingId =" + \
                           str(rows['CaregiverSlotSchedulingId']) + ";"
                 cursor.execute(sqlText)
@@ -63,9 +61,9 @@ class VaccineReservationScheduler:
         if slotid < 0:
             return -2
         self.slotSchedulingId = slotid
-        
+
         self.getAppointmentSQL = "SELECT * FROM CareGiverSchedule WHERE SlotStatus = 1 AND CaregiverSlotSchedulingId =" + str(self.slotSchedulingId) + ";"
-        
+
         try:
             cursor.execute(self.getAppointmentSQL)
             rows = cursor.fetchone()
@@ -85,7 +83,7 @@ class VaccineReservationScheduler:
 
             return self.slotSchedulingId
 
-        except pymssql.Error as db_err:    
+        except pymssql.Error as db_err:
             print("Database Programming Error in SQL Query processing! ")
             print("Exception code: " + db_err.args[0])
             if len(db_err.args) > 1:
@@ -125,20 +123,16 @@ if __name__ == '__main__':
                 cgid = cg.caregiverId
                 caregivers[cgid] = cg
 
-            tester = VaccineReservationScheduler()
-            #tester.PutHoldOnAppointmentSlot(dbcursor)
-            tester.PutHoldOnAppointmentSlot(dbcursor)
-            tester.ScheduleAppointmentSlot(2, dbcursor)
-            #print('check the tables')
 
-            # a = covid('Moderna', dbcursor)
+            moderna = covid('Moderna', dbcursor)
             # b = covid('J&J', dbcursor)
             # a.AddDoses(-6, dbcursor)
             # b.ReserveDoses(7, dbcursor)
             # c = covid('hello world', dbcursor)
 
-            # p1 = patient('Mark Friedman', 0, dbcursor_1)
-            # p1.ReserveAppointment(0, 'Moderna', dbcursor_1)
+            p1 = patient('Mark Friedman', 0, dbcursor_1)
+
+            p1.ReserveAppointment(vrs.PutHoldOnAppointmentSlot(dbcursor_1), moderna, dbcursor_1)
 
             # Add a vaccine and Add doses to inventory of the vaccine
             # Ass patients

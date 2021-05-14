@@ -44,24 +44,35 @@ class VaccinePatient:
                 raise ValueError()
 
             # Reserving Vaccine Doses
-            sqltext = "select DosesPerPatient from vaccine where vaccine = {}".format(Vaccine.vaccine)
+            sqltext = "select DosesPerPatient from Vaccines where VaccineName = '{}'".format(Vaccine.vaccine)
             cursor.execute(sqltext)
-            dosesPerPatient = cursor["DosesPerPatient"]
-            Vaccine.reserve(dosesPerPatient, cursor)
+            dosesPerPatient = cursor.fetchone()["DosesPerPatient"]
+            Vaccine.ReserveDoses(dosesPerPatient, cursor)
 
-            # Initial Entry in the Vaccine Appointment Table
+            # Initial Entry in the Vaccine Appointment Table of the FIRST DOSE
             VaccineName = Vaccine.vaccine
-            PatientId = self.PatientId
             CaregiverId = caregiver_result['CaregiverId']
             ReservationDate = caregiver_result['WorkDay']
             ReservationStartHour = caregiver_result["SlotHour"]
             ReservationStartMinute = caregiver_result["SlotMinute"]
             AppointmentDuration = 15
-            SlotStatus = 2
+            SlotStatus = 1
             DoseNumber = 1
 
-        # self.firstAppointmentId
-        # self.secondAppointmentId
+            sqltext = ("INSERT INTO VaccineAppointments (VaccineName, PatientId, CaregiverId, ReservationDate, " +
+                       "ReservationStartHour, ReservationStartMinute, AppointmentDuration, SlotStatus, DoseNumber)  " +
+                       "Values ('{}', {}, {}, '{}', {}, {}, {}, {}, {})".format(VaccineName, self.PatientId, CaregiverId,
+                        ReservationDate, ReservationStartHour, ReservationStartMinute, AppointmentDuration, SlotStatus, DoseNumber))
+            cursor.execute(sqltext)
+            cursor.connection.commit()
+            cursor.execute("SELECT @@IDENTITY AS 'Identity'; ")
+            self.firstAppointmentId = cursor.fetchone()['Identity']
+
+            # Initial Entry in the Vaccine Appointment Table of the SECOND DOSE
+            if dosesPerPatient != 2:
+                return
+
+
 
         except ValueError:
             print("The slot is not currently on hold...")

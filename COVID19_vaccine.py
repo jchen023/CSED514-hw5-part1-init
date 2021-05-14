@@ -38,16 +38,10 @@ class COVID19Vaccine:
                     _DoseNeeded,
                     _TotalDoses
                 )
-            self.vid = 0
-
             cursor.execute(self.sqltext)
             cursor.connection.commit()
-            cursor.execute("SELECT @@IDENTITY AS 'Identity'; ")
-            _identityRow = cursor.fetchone()
-            self.vid = _identityRow['Identity']
-            cursor.connection.commit()
             print('Query executed successfully. Vaccine : ' + self.vaccine
-                  + ' added to the database using Vaccine ID = ' + str(self.vid))
+                  + ' added to the database')
         except NameError:
             print("Please Add Pfizer, Moderna, J&J or AstraZeneca. For other vaccine, please contact customer service MARK FRIEDMAN at (425) 949-2302")
         except pymssql.Error as db_err:
