@@ -81,7 +81,7 @@ class COVID19Vaccine:
 
     def ReserveDoses(self, doses, cursor):
         self.sqltext = \
-            "Update Vaccine Set Inventory = Inventory -  %d Where Vid = %d" % (
+            "Update Vaccine Set Available = Available -  %d Where Vid = %d" % (
                 doses,
                 self.vid
             )

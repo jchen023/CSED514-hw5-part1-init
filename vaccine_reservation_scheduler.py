@@ -9,7 +9,7 @@ from vaccine_caregiver import VaccineCaregiver
 from enums import *
 from utils import *
 from COVID19_vaccine import COVID19Vaccine as covid
-# from vaccine_patient import VaccinePatient as patient
+from VaccinePatient import VaccinePatient as patient
 
 
 class VaccineReservationScheduler:
@@ -25,7 +25,7 @@ class VaccineReservationScheduler:
         # Note to students: this is a stub that needs to replaced with your code
 
         # replacing 0 with -2 to cover edge case
-        #  
+        #
         self.slotSchedulingId = -2
         self.getAppointmentSQL = "SELECT * FROM CareGiverSchedule WHERE SlotStatus = 0;"
         try:
@@ -34,14 +34,12 @@ class VaccineReservationScheduler:
             self.slotSchedulingId = rows['CaregiverSlotSchedulingId']
             #
 
-            if (len(rows) != 0):
+            if rows:
                 print(str(rows['CaregiverSlotSchedulingId']))
-                sqlText = "Update CareGiverSchedule Set SlotStatus = 1 WHERE CaregiverSlotSchedulingId =" + str(rows['CaregiverSlotSchedulingId']) + ";"
+                sqlText = "Update CareGiverSchedule Set SlotStatus = 1 WHERE CaregiverSlotSchedulingId =" + \
+                          str(rows['CaregiverSlotSchedulingId']) + ";"
                 cursor.execute(sqlText)
                 cursor.connection.commit()
-                
-            
-            #cursor.connection.commit()
 
             return self.slotSchedulingId
         
@@ -83,21 +81,22 @@ if __name__ == '__main__':
         #                           UserId=os.getenv("UserID"),
         #                           Password=os.getenv("Password")) as sqlClient:
 
-        # with SqlConnectionManager(Server="jchen023.database.windows.net",
-        #                           DBname="DATA_514_DB",
-        #                           UserId='jchen023',
-        #                           Password="Data5142021") as sqlClient:
+        with SqlConnectionManager(Server="jchen023.database.windows.net",
+                                  DBname="DATA_514_DB",
+                                  UserId='jchen023',
+                                  Password="Data5142021") as sqlClient:
 
-        with SqlConnectionManager(Server="data514server-sp.database.windows.net",
-                                  DBname="DATA514dbMain",
-                                  UserId='sampereb',
-                                  Password="Data514HW") as sqlClient:
+        # with SqlConnectionManager(Server="data514server-sp.database.windows.net",
+        #                           DBname="DATA514dbMain",
+        #                           UserId='sampereb',
+        #                           Password="Data514HW") as sqlClient:
 
-            #clear_tables(sqlClient)
+            clear_tables(sqlClient)
             vrs = VaccineReservationScheduler()
 
             # get a cursor from the SQL connection
             dbcursor = sqlClient.cursor(as_dict=True)
+            dbcursor_1 = sqlClient.cursor(as_dict=True)
 
             # Iniialize the caregivers, patients & vaccine supply
             caregiversList = []
@@ -117,7 +116,10 @@ if __name__ == '__main__':
             # a.AddDoses(-6, dbcursor)
             # b.ReserveDoses(7, dbcursor)
             # c = covid('hello world', dbcursor)
-            
+
+            p1 = patient('Mark Friedman', 0, dbcursor_1)
+            p1.ReserveAppointment(0, 'Moderna', dbcursor_1)
+
             # Add a vaccine and Add doses to inventory of the vaccine
             # Ass patients
             # Schedule the patients

@@ -133,3 +133,5 @@ Create Table VaccineAppointments(
 		DateAdministered datetime,
 		DoseNumber int
 );
+
+Execute InitScheduerApp

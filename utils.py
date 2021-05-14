@@ -6,7 +6,9 @@ def clear_tables(client):
                DBCC CHECKIDENT ('Caregivers', RESEED, 0)
                Truncate TABLE VaccineAppointments
                DBCC CHECKIDENT ('VaccineAppointments', RESEED, 0)
-               Delete FROM Vaccines
+               Delete From Patients
+               DBCC CHECKIDENT ('Patients', RESEED, 0)
+               DELETE FROM Vaccines
                '''
     client.cursor().execute(sqlQuery)
     client.commit()
