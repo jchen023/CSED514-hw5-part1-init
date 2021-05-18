@@ -91,6 +91,7 @@ class VaccineReservationScheduler:
             print("SQL text that resulted in an Error: " + self.getAppointmentSQL)
             return -1
 
+   
 if __name__ == '__main__':
         # with SqlConnectionManager(Server=os.getenv("Server"),
         #                           DBname=os.getenv("DBName"),
@@ -107,7 +108,7 @@ if __name__ == '__main__':
                                   UserId='sampereb',
                                   Password="Data514HW") as sqlClient:
 
-            #clear_tables(sqlClient)
+            clear_tables(sqlClient)
             vrs = VaccineReservationScheduler()
 
             # get a cursor from the SQL connection
@@ -116,6 +117,7 @@ if __name__ == '__main__':
 
             # Iniialize the caregivers, patients & vaccine supply
             caregiversList = []
+            #for i in range(80):
             caregiversList.append(VaccineCaregiver('Carrie Nation', dbcursor))
             caregiversList.append(VaccineCaregiver('Clare Barton', dbcursor))
             caregivers = {}
@@ -131,8 +133,11 @@ if __name__ == '__main__':
             # c = covid('hello world', dbcursor)
 
             p1 = patient('Mark Friedman', 0, dbcursor_1)
-
+            print('LOOK')
             p1.ReserveAppointment(vrs.PutHoldOnAppointmentSlot(dbcursor_1), moderna, dbcursor_1)
+            #print(r1)
+
+            #p1.reserveAppt2(r1,moderna,dbcursor_1)
 
             # Add a vaccine and Add doses to inventory of the vaccine
             # Ass patients
