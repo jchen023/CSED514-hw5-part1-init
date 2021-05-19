@@ -34,13 +34,12 @@ class VaccineReservationScheduler:
             self.slotSchedulingId = rows['CaregiverSlotSchedulingId']
 
             if rows:
-                sqlText = "Update CareGiverSchedule Set SlotStatus = 1 WHERE CaregiverSlotSchedulingId =" + \
-                          str(rows['CaregiverSlotSchedulingId']) + ";"
+                sqlText = "Update CareGiverSchedule Set SlotStatus = 1 WHERE CaregiverSlotSchedulingId =" \
+                          + str(rows['CaregiverSlotSchedulingId']) + "and SlotStatus = 0;"
                 cursor.execute(sqlText)
                 cursor.connection.commit()
-
             return self.slotSchedulingId
-        
+
         except pymssql.Error as db_err:
             print("Database Programming Error in SQL Query processing! ")
             print("Exception code: " + str(db_err.args[0]))
@@ -68,19 +67,14 @@ class VaccineReservationScheduler:
             cursor.execute(self.getAppointmentSQL)
             rows = cursor.fetchone()
 
-            if (rows):
+            if rows:
                 sqlText = "Update CareGiverSchedule Set SlotStatus = 2 WHERE CaregiverSlotSchedulingId =" + \
                           str(self.slotSchedulingId) + ";"
                 cursor.execute(sqlText)
                 cursor.connection.commit()
-                #print('we reserve')
-
             else:
                 print('Invalid SlotID')
                 self.slotSchedulingId = 21
-
-
-
             return self.slotSchedulingId
 
         except pymssql.Error as db_err:
@@ -91,7 +85,7 @@ class VaccineReservationScheduler:
             print("SQL text that resulted in an Error: " + self.getAppointmentSQL)
             return -1
 
-   
+
 if __name__ == '__main__':
         # with SqlConnectionManager(Server=os.getenv("Server"),
         #                           DBname=os.getenv("DBName"),
@@ -117,7 +111,6 @@ if __name__ == '__main__':
 
             # Iniialize the caregivers, patients & vaccine supply
             caregiversList = []
-            #for i in range(80):
             caregiversList.append(VaccineCaregiver('Carrie Nation', dbcursor))
             caregiversList.append(VaccineCaregiver('Clare Barton', dbcursor))
             caregivers = {}
@@ -125,23 +118,18 @@ if __name__ == '__main__':
                 cgid = cg.caregiverId
                 caregivers[cgid] = cg
 
-
             moderna = covid('Moderna', dbcursor)
-            # b = covid('J&J', dbcursor)
-            # a.AddDoses(-6, dbcursor)
+            moderna.AddDoses(5, dbcursor)
             # b.ReserveDoses(7, dbcursor)
             # c = covid('hello world', dbcursor)
 
             p1 = patient('Mark Friedman', 0, dbcursor_1)
             print('LOOK')
             p1.ReserveAppointment(vrs.PutHoldOnAppointmentSlot(dbcursor_1), moderna, dbcursor_1)
-            #print(r1)
-
-            #p1.reserveAppt2(r1,moderna,dbcursor_1)
 
             # Add a vaccine and Add doses to inventory of the vaccine
             # Ass patients
             # Schedule the patients
             
             # Test cases done!
-            clear_tables(sqlClient)
+            # clear_tables(sqlClient)

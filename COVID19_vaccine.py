@@ -32,11 +32,13 @@ class COVID19Vaccine:
                 _MaxStorageTemperature = -10000
 
             self.sqltext = \
-                "INSERT INTO Vaccines (VaccineName, DaysBetweenDoses, DosesPerPatient, TotalDoses) VALUES ('%s', %d, %d, %d);" % (
+                "INSERT INTO Vaccines (VaccineName, DaysBetweenDoses, DosesPerPatient, TotalDoses, AvailableDoses, ReservedDoses) VALUES ('%s', %d, %d, %d, %d, %d);" % (
                     self.vaccine,
                     _DateBetweenDoses,
                     _DoseNeeded,
-                    _TotalDoses
+                    _TotalDoses,
+                    0,
+                    0
                 )
             cursor.execute(self.sqltext)
             cursor.connection.commit()
@@ -51,14 +53,13 @@ class COVID19Vaccine:
                 print("Exception message: " + db_err.args[1])
             print("SQL text that resulted in an Error: " + self.sqltext)
 
-
     def AddDoses(self, doses, cursor):
         
         self.sqltext = \
-            "Update Vaccines Set TotalDoses = TotalDoses +  %d Where VaccineName = '%s' " % (
+            "Update Vaccines Set TotalDoses = TotalDoses +  %d Where VaccineName = '%s';" % (
                 doses,
                 self.vaccine
-            ) + "; Update Vaccines Set AvailableDoses = AvailableDoses + %d Where VaccineName = '%s'" % (
+            ) + "Update Vaccines Set AvailableDoses = AvailableDoses + %d Where VaccineName = '%s'" % (
                 doses,
                 self.vaccine
             )

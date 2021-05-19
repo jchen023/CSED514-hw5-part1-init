@@ -100,7 +100,6 @@ Create Table Patients(
 	VaccineStatus int NOT NULL
 		CONSTRAINT FK_PatientStatusCode FOREIGN KEY (VaccineStatus) 
 		     REFERENCES PatientAppointmentStatusCodes(StatusCodeId),
-
 	);
 
 Create Table Vaccines(
