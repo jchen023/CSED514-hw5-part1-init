@@ -181,13 +181,13 @@ class VaccinePatient:
             #### Update CareGiverSchedule to scheduled from queued
             sqltext1 = "Update CareGiverSchedule Set SlotStatus = 2 WHERE CaregiverSlotSchedulingId = " \
                         + str(self.firstAppointmentId) + "and SlotStatus = 1;" + \
-                       "Update Patient Set VaccineStatus = 2 WHERE PatientId = " + self.PatientId + ";"
+                       "Update Patients Set VaccineStatus = 2 WHERE PatientId = " + str(self.PatientId) + ";"
             cursor.execute(sqltext1)
             cursor.connection.commit()
             if self.secondAppointmentId >= 0:
                 sqltext2 = "Update CareGiverSchedule Set SlotStatus = 2 WHERE CaregiverSlotSchedulingId = " \
                             + str(self.secondAppointmentId) + ";" \
-                +" Update Patient Set VaccineStatus = 5 WHERE PatientId = " + self.PatientId + ";"
+                +" Update Patients Set VaccineStatus = 5 WHERE PatientId = " + str(self.PatientId) + ";"
                 cursor.execute(sqltext2)
                 cursor.connection.commit()
 

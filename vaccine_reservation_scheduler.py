@@ -117,9 +117,10 @@ if __name__ == '__main__':
             print('LOOK')
             p1.ReserveAppointment(vrs.PutHoldOnAppointmentSlot(dbcursor_1), moderna, dbcursor_1)
 
+            p1.ScheduleAppointment(dbcursor_1)
             # Add a vaccine and Add doses to inventory of the vaccine
             # Ass patients
             # Schedule the patients
             
             # Test cases done!
-            # clear_tables(sqlClient)
+            #clear_tables(sqlClient)
