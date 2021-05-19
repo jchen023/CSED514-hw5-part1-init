@@ -27,7 +27,7 @@ class VaccineReservationScheduler:
         # replacing 0 with -2 to cover edge case
         #
         self.slotSchedulingId = -2
-        self.getAppointmentSQL = "SELECT * FROM CareGiverSchedule WHERE SlotStatus = 0;"
+        self.getAppointmentSQL = "SELECT * FROM CareGiverSchedule WHERE SlotStatus = 0 ORDER BY WorkDay, SlotHour;"
         try:
             cursor.execute(self.getAppointmentSQL)
             rows = cursor.fetchone()
@@ -109,7 +109,7 @@ if __name__ == '__main__':
                 caregivers[cgid] = cg
 
             moderna = covid('Moderna', dbcursor)
-            moderna.AddDoses(0, dbcursor)
+            moderna.AddDoses(7, dbcursor)
             # b.ReserveDoses(7, dbcursor)
             # c = covid('hello world', dbcursor)
 

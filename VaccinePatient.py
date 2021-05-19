@@ -126,7 +126,7 @@ class VaccinePatient:
             # Checking if the slot is on hold
             sqltext = ("select * from CareGiverSchedule where WorkDay >= '"
                        + str(lowerD) + "' AND WorkDay <= '" + str(upperD) +
-                        "' AND SlotStatus = 0;")
+                        "' AND SlotStatus = 0 ORDER BY WorkDay, SlotHour;")
             cursor.execute(sqltext)
             self.appt2Result = cursor.fetchone()
             if not self.appt2Result:
@@ -160,7 +160,7 @@ class VaccinePatient:
             self.secondAppointmentId = cursor.fetchone()['Identity']
 
             sqltext = "Update CareGiverSchedule Set VaccineAppointmentId = {} WHERE CaregiverSlotSchedulingId = {} and SlotStatus = 1;" \
-                .format(self.secondAppointmentId, str(appt2Result['CaregiverSlotSchedulingId']))
+                .format(self.secondAppointmentId, str(self.appt2Result['CaregiverSlotSchedulingId']))
             cursor.execute(sqltext)
             cursor.connection.commit()
 
