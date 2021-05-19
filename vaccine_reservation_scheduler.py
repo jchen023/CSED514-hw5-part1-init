@@ -109,15 +109,14 @@ if __name__ == '__main__':
                 caregivers[cgid] = cg
 
             moderna = covid('Moderna', dbcursor)
-            moderna.AddDoses(7, dbcursor)
+            moderna.AddDoses(0, dbcursor)
             # b.ReserveDoses(7, dbcursor)
             # c = covid('hello world', dbcursor)
 
             p1 = patient('Mark Friedman', 0, dbcursor_1)
             print('LOOK')
             p1.ReserveAppointment(vrs.PutHoldOnAppointmentSlot(dbcursor_1), moderna, dbcursor_1)
-            print('Checker:')
-            p1.ScheduleAppointment(dbcursor_1)
+
             # Add a vaccine and Add doses to inventory of the vaccine
             # Ass patients
             # Schedule the patients

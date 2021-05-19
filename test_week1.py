@@ -8,10 +8,6 @@ from COVID19_vaccine import COVID19Vaccine as covid
 
 class TestVaccineFunction(unittest.TestCase):
     def testVaccine_init(self):
-        print(os.getenv("Server"),
-                                    os.getenv("DBName"),
-                                    os.getenv("UserID"),
-                                    os.getenv("Password"))
         with SqlConnectionManager(Server=os.getenv("Server"),
                                       DBname=os.getenv("DBName"),
                                       UserId=os.getenv("UserID"),

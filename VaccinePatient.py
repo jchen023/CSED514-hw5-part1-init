@@ -82,6 +82,11 @@ class VaccinePatient:
             self.firstAppointmentId = cursor.fetchone()['Identity']
 
             print("First Appointment", self.firstAppointmentId)
+            sqltext = "Update CareGiverSchedule Set VaccineAppointmentId = {} WHERE CaregiverSlotSchedulingId = {} and SlotStatus = 1;" \
+                .format(self.firstAppointmentId, CaregiverSchedulingID)
+            cursor.execute(sqltext)
+            cursor.connection.commit()
+
             # Initial Entry in the Vaccine Appointment Table of the SECOND DOSE
             if dosesPerPatient != 2:
                 return
@@ -95,6 +100,7 @@ class VaccinePatient:
 
             if self.secondAppointmentId >= 0:
                 print("Second Appointment", self.secondAppointmentId)
+            return self.caregiver_result
         except NotEnoughVaccine:
             print("There is no available vaccine dose available")
             cursor.connection.rollback()
@@ -107,8 +113,6 @@ class VaccinePatient:
             if len(db_err.args) > 1:
                 print("Exception message: " + db_err.args[1])
             print("SQL text that resulted in an Error: " + sqltext)
-        
-        return self.caregiver_result 
 
     def reserveAppt2(self, appt1, Vaccine, cursor):
         """ appt1 is the row of caregiverschedule table corresponding to first appointement """
@@ -129,8 +133,8 @@ class VaccinePatient:
                 print("we have reserved your first appointment but there is not second appointment slot available.")
 
             # Find an opening in the caregiver schedule
-            sqltext = "Update CareGiverSchedule Set SlotStatus = 1 WHERE CaregiverSlotSchedulingId = " \
-            + str(self.appt2Result['CaregiverSlotSchedulingId']) + "and SlotStatus = 0;"
+            sqltext = "Update CareGiverSchedule Set SlotStatus = 1 WHERE CaregiverSlotSchedulingId = {} and SlotStatus = 0;"\
+                .format(str(self.appt2Result['CaregiverSlotSchedulingId']))
             cursor.execute(sqltext)
             cursor.connection.commit()
 
@@ -143,6 +147,8 @@ class VaccinePatient:
             SlotStatus = 1
             DoseNumber = 2
 
+            Vaccine.ReserveDoses(1, cursor)
+
             sqltext = ("INSERT INTO VaccineAppointments (VaccineName, PatientId, CaregiverId, ReservationDate, " +
                        "ReservationStartHour, ReservationStartMinute, AppointmentDuration, SlotStatus, DoseNumber)  " +
                        "Values ('{}', {}, {}, '{}', {}, {}, {}, {}, {})".format(VaccineName, self.PatientId, CaregiverId,
@@ -150,10 +156,14 @@ class VaccinePatient:
             cursor.execute(sqltext)
             cursor.connection.commit()
 
-            Vaccine.ReserveDoses(1, cursor)
-
             cursor.execute("SELECT @@IDENTITY AS 'Identity'; ")
             self.secondAppointmentId = cursor.fetchone()['Identity']
+
+            sqltext = "Update CareGiverSchedule Set VaccineAppointmentId = {} WHERE CaregiverSlotSchedulingId = {} and SlotStatus = 1;" \
+                .format(self.secondAppointmentId, str(appt2Result['CaregiverSlotSchedulingId']))
+            cursor.execute(sqltext)
+            cursor.connection.commit()
+
         except NotEnoughVaccine:
             print("We have reserved your first appointment but there is either no second appointment slot available or not enough doses left.")
             self.secondAppointmentId = -1
@@ -183,35 +193,35 @@ class VaccinePatient:
 
             sqltext2 = "Update CareGiverSchedule Set SlotStatus = 2 WHERE CaregiverSlotSchedulingId = " \
                         + str(appt2['CaregiverSlotSchedulingId']) + ";"
-            
+
             cursor.execute(sqltext1)
             cursor.connection.commit()
             cursor.execute(sqltext2)
             cursor.connection.commit()
 
             print('id', vaccApptId1, vaccApptId2)
-        
+
             sqltext3 = "SELECT * FROM VaccineAppointments WHERE VaccineAppointmentId = '"\
                         + str(vaccApptId1) + "' OR VaccineAppointmentId =  '" + str(vaccApptId2) + "';"
-            
+
             cursor.execute(sqltext3)
             vaccineAppts = cursor.fetchall()
             print('Vacc:', vaccineAppts)
             pId1 = vaccineAppts[0]['PatientId']
             pId2 = vaccineAppts[1]['PatientId']
 
-            print(pId1,pId2)
+            print(pId1, pId2)
 
             sqltext4 = "Update Patient Set VaccineStatus = 2 WHERE PatientId = " + str(pId1) + ";"
             sqltext5 = "Update Patient Set VaccineStatus = 5 WHERE PatientId = " + str(pId2) + ";"
 
             cursor.execute(sqltext4)
             cursor.connection.commit()
-            
-            if (pId2 != None):
+
+            if not pId2:
                 cursor.execute(sqltext5)
                 cursor.connection.commit()
-            
+
         except pymssql.Error as db_err:
             print("Database Programming Error in SQL Query processing for Reserving Appointments")
             print("Exception code: " + str(db_err.args[0]))
@@ -219,8 +229,3 @@ class VaccinePatient:
                 print("Exception message: " + db_err.args[1])
             print("SQL text that resulted in an Error")
 
-
-
-            
-                
-            
