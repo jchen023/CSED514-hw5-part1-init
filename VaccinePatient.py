@@ -161,6 +161,8 @@ class VaccinePatient:
 
 
     def ScheduleAppointment(self):
-        pass
+        
+        try: 
+            
 
 
