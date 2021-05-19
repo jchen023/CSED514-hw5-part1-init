@@ -126,7 +126,8 @@ if __name__ == '__main__':
             p1 = patient('Mark Friedman', 0, dbcursor_1)
             print('LOOK')
             p1.ReserveAppointment(vrs.PutHoldOnAppointmentSlot(dbcursor_1), moderna, dbcursor_1)
-
+            print('Checker:')
+            p1.ScheduleAppointment(dbcursor_1)
             # Add a vaccine and Add doses to inventory of the vaccine
             # Ass patients
             # Schedule the patients

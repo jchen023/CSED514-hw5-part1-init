@@ -40,8 +40,8 @@ class VaccinePatient:
             sqltext = ("select * from CareGiverSchedule where CaregiverSlotSchedulingId = %d"
                        % (CaregiverSchedulingID))
             cursor.execute(sqltext)
-            caregiver_result = cursor.fetchone()
-            slotStatus = caregiver_result['SlotStatus']
+            self.caregiver_result = cursor.fetchone()
+            slotStatus = self.caregiver_result['SlotStatus']
             if slotStatus != 1:
                 raise ValueError()
 
@@ -56,10 +56,10 @@ class VaccinePatient:
 
             # Initial Entry in the Vaccine Appointment Table of the FIRST DOSE
             VaccineName = Vaccine.vaccine
-            CaregiverId = caregiver_result['CaregiverId']
-            ReservationDate = caregiver_result['WorkDay']
-            ReservationStartHour = caregiver_result["SlotHour"]
-            ReservationStartMinute = caregiver_result["SlotMinute"]
+            CaregiverId = self.caregiver_result['CaregiverId']
+            ReservationDate = self.caregiver_result['WorkDay']
+            ReservationStartHour = self.caregiver_result["SlotHour"]
+            ReservationStartMinute = self.caregiver_result["SlotMinute"]
             AppointmentDuration = 15
             SlotStatus = 1
             DoseNumber = 1
@@ -76,7 +76,7 @@ class VaccinePatient:
             # Initial Entry in the Vaccine Appointment Table of the SECOND DOSE
             if dosesPerPatient != 2:
                 return
-            self.reserveAppt2(caregiver_result, Vaccine, cursor)
+            self.reserveAppt2(self.caregiver_result, Vaccine, cursor)
             print("First Appointment", self.firstAppointmentId)
             if self.secondAppointmentId >= 0:
                 print("Second Appointment", self.secondAppointmentId)
@@ -92,7 +92,7 @@ class VaccinePatient:
                 print("Exception message: " + db_err.args[1])
             print("SQL text that resulted in an Error: " + sqltext)
         
-        return caregiver_result 
+        return self.caregiver_result 
 
     def reserveAppt2(self, appt1, Vaccine, cursor):
         """ appt1 is the row of caregiverschedule table corresponding to first appointement """
@@ -108,21 +108,21 @@ class VaccinePatient:
                        + str(lowerD) + "' AND WorkDay <= '" + str(upperD) +
                         "') AND SlotStatus = 0;") 
             cursor.execute(sqltext)
-            appt2Result = cursor.fetchone()
-            if not appt2Result:
+            self.appt2Result = cursor.fetchone()
+            if not self.appt2Result:
                 print("we have reserved your first appointment but there is not second appointment slot available.")
 
             # Find an opening in the caregiver schedule
             sqltext = "Update CareGiverSchedule Set SlotStatus = 1 WHERE CaregiverSlotSchedulingId = " \
-            + str(appt2Result['CaregiverSlotSchedulingId']) + "and SlotStatus = 0;"
+            + str(self.appt2Result['CaregiverSlotSchedulingId']) + "and SlotStatus = 0;"
             cursor.execute(sqltext)
             cursor.connection.commit()
 
             VaccineName = Vaccine.vaccine
-            CaregiverId = appt2Result['CaregiverId']
-            ReservationDate = appt2Result['WorkDay']
-            ReservationStartHour = appt2Result["SlotHour"]
-            ReservationStartMinute = appt2Result["SlotMinute"]
+            CaregiverId = self.appt2Result['CaregiverId']
+            ReservationDate = self.appt2Result['WorkDay']
+            ReservationStartHour = self.appt2Result["SlotHour"]
+            ReservationStartMinute = self.appt2Result["SlotMinute"]
             AppointmentDuration = 15
             SlotStatus = 1
             DoseNumber = 2
@@ -142,5 +142,58 @@ class VaccinePatient:
                 print("Exception message: " + db_err.args[1])
             print("SQL text that resulted in an Error: " + sqltext)
 
-    def ScheduleAppointment(self):
-        pass
+    def ScheduleAppointment(self, cursor):
+        appt1 = self.caregiver_result
+        appt2 = self.appt2Result
+
+        print(appt1)
+        print(appt2)
+
+        vaccApptId1 = appt1['VaccineAppointmentId']
+        vaccApptId2 = appt2['VaccineAppointmentId']
+
+        #caregiverSlotStat = 2
+
+        try:
+            sqltext1 = "Update CareGiverSchedule Set SlotStatus = 2 WHERE CaregiverSlotSchedulingId = " \
+                        + str(appt1['CaregiverSlotSchedulingId']) + ";"
+
+            sqltext2 = "Update CareGiverSchedule Set SlotStatus = 2 WHERE CaregiverSlotSchedulingId = " \
+                        + str(appt2['CaregiverSlotSchedulingId']) + ";"
+            
+            cursor.execute(sqltext1)
+            cursor.connection.commit()
+            cursor.execute(sqltext2)
+            cursor.connection.commit()
+        
+            sqltext3 = "SELECT * FROM VaccineAppointments WHERE VaccineAppointmentId = "\
+                        + str(vaccApptId1) + " OR VaccineAppointmentId =  " + str(vaccApptId2) + ";"
+            
+            cursor.execute(sqltext3)
+            vaccineAppts = cursor.fetchall()
+            print('Vacc:', vaccineAppts)
+            pId1 = vaccineAppts[0]['PatientId']
+            pId2 = vaccineAppts[1]['PatientId']
+
+            sqltext4 = "Update Patient Set VaccineStatus = 2 WHERE PatientId = " + str(pId1) + ";"
+            sqltext5 = "Update Patient Set VaccineStatus = 5 WHERE PatientId = " + str(pId2) + ";"
+
+            cursor.execute(sqltext4)
+            cursor.connection.commit()
+            
+            if (pId2 != None):
+                cursor.execute(sqltext5)
+                cursor.connection.commit()
+            
+        except pymssql.Error as db_err:
+            print("Database Programming Error in SQL Query processing for Reserving Appointments")
+            print("Exception code: " + str(db_err.args[0]))
+            if len(db_err.args) > 1:
+                print("Exception message: " + db_err.args[1])
+            print("SQL text that resulted in an Error")
+
+
+
+            
+                
+            
