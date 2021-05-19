@@ -42,8 +42,8 @@ class VaccinePatient:
             sqltext = ("select * from CareGiverSchedule where CaregiverSlotSchedulingId = %d"
                        % (CaregiverSchedulingID))
             cursor.execute(sqltext)
-            self.caregiver_result = cursor.fetchone()
-            slotStatus = self.caregiver_result['SlotStatus']
+            caregiver_result = cursor.fetchone()
+            slotStatus = caregiver_result['SlotStatus']
             if slotStatus != 1:
                 raise ValueError()
 
@@ -58,10 +58,10 @@ class VaccinePatient:
 
             # Initial Entry in the Vaccine Appointment Table of the FIRST DOSE
             VaccineName = Vaccine.vaccine
-            CaregiverId = self.caregiver_result['CaregiverId']
-            ReservationDate = self.caregiver_result['WorkDay']
-            ReservationStartHour = self.caregiver_result["SlotHour"]
-            ReservationStartMinute = self.caregiver_result["SlotMinute"]
+            CaregiverId = caregiver_result['CaregiverId']
+            ReservationDate = caregiver_result['WorkDay']
+            ReservationStartHour = caregiver_result["SlotHour"]
+            ReservationStartMinute = caregiver_result["SlotMinute"]
             AppointmentDuration = 15
             SlotStatus = 1
             DoseNumber = 1
@@ -96,7 +96,7 @@ class VaccinePatient:
                 UserId=os.getenv("UserID"),
                 Password=os.getenv("Password")) as sqlClient:
                 new_cursor = sqlClient.cursor(as_dict=True)
-                self.reserveAppt2(self.caregiver_result, Vaccine, new_cursor)
+                self.reserveAppt2(caregiver_result, Vaccine, new_cursor)
 
             if self.secondAppointmentId >= 0:
                 print("Second Appointment", self.secondAppointmentId)
@@ -128,21 +128,21 @@ class VaccinePatient:
                        + str(lowerD) + "' AND WorkDay <= '" + str(upperD) +
                         "' AND SlotStatus = 0 ORDER BY WorkDay, SlotHour;")
             cursor.execute(sqltext)
-            self.appt2Result = cursor.fetchone()
-            if not self.appt2Result:
+            appt2Result = cursor.fetchone()
+            if not appt2Result:
                 print("we have reserved your first appointment but there is not second appointment slot available.")
 
             # Find an opening in the caregiver schedule
             sqltext = "Update CareGiverSchedule Set SlotStatus = 1 WHERE CaregiverSlotSchedulingId = {} and SlotStatus = 0;"\
-                .format(str(self.appt2Result['CaregiverSlotSchedulingId']))
+                .format(str(appt2Result['CaregiverSlotSchedulingId']))
             cursor.execute(sqltext)
             cursor.connection.commit()
 
             VaccineName = Vaccine.vaccine
-            CaregiverId = self.appt2Result['CaregiverId']
-            ReservationDate = self.appt2Result['WorkDay']
-            ReservationStartHour = self.appt2Result["SlotHour"]
-            ReservationStartMinute = self.appt2Result["SlotMinute"]
+            CaregiverId = appt2Result['CaregiverId']
+            ReservationDate = appt2Result['WorkDay']
+            ReservationStartHour = appt2Result["SlotHour"]
+            ReservationStartMinute = appt2Result["SlotMinute"]
             AppointmentDuration = 15
             SlotStatus = 1
             DoseNumber = 2
@@ -160,7 +160,7 @@ class VaccinePatient:
             self.secondAppointmentId = cursor.fetchone()['Identity']
 
             sqltext = "Update CareGiverSchedule Set VaccineAppointmentId = {} WHERE CaregiverSlotSchedulingId = {} and SlotStatus = 1;" \
-                .format(self.secondAppointmentId, str(self.appt2Result['CaregiverSlotSchedulingId']))
+                .format(self.secondAppointmentId, str(appt2Result['CaregiverSlotSchedulingId']))
             cursor.execute(sqltext)
             cursor.connection.commit()
 
