@@ -99,7 +99,7 @@ if __name__ == '__main__':
             dbcursor = sqlClient.cursor(as_dict=True)
             dbcursor_1 = sqlClient.cursor(as_dict=True)
 
-            # Iniialize the caregivers, patients & vaccine supply
+            # Initialize the caregivers, patients & vaccine supply
             caregiversList = []
             caregiversList.append(VaccineCaregiver('Carrie Nation', dbcursor))
             caregiversList.append(VaccineCaregiver('Clare Barton', dbcursor))
