@@ -1,5 +1,6 @@
 from datetime import datetime
 from datetime import timedelta
+from VaccinePatient import NotEnoughVaccine
 import pymssql
 
 
@@ -80,21 +81,32 @@ class COVID19Vaccine:
             print("SQL text that resulted in an Error: " + self.sqltext)
 
     def ReserveDoses(self, doses, cursor):
-        self.sqltext = \
-            "Update Vaccines Set TotalDoses = TotalDoses -  %d Where VaccineName = '%s'" % (
-                doses,
-                self.vaccine
-            ) + "; Update Vaccines Set AvailableDoses = AvailableDoses - %d Where VaccineName = '%s'" % (
-                doses,
-                self.vaccine
-            )
         try:
             if doses <= 0:
                 raise ValueError()
+            self.sqltext = "select * from Vaccines where VaccineName = '{}'".format(self.vaccine)
+            cursor.execute(self.sqltext)
+            availabledoses = cursor.fetchone()['AvailableDoses']
+            if availabledoses <= 0:
+                raise NotEnoughVaccine
+
+            self.sqltext = \
+                "Update Vaccines Set ReservedDoses = ReservedDoses +  %d Where VaccineName = '%s' ;" % (
+                    doses,
+                    self.vaccine
+                ) + "Update Vaccines Set AvailableDoses = AvailableDoses - %d Where VaccineName = '%s'" % (
+                    doses,
+                    self.vaccine
+                )
             cursor.execute(self.sqltext)
             cursor.connection.commit()
-            print('Query executed successfully. Dose Deleted')
-        except ValueError as e:
+            self.sqltext = "select * from Vaccines where VaccineName = '{}'".format(self.vaccine)
+            cursor.execute(self.sqltext)
+            availabledoses = cursor.fetchone()['AvailableDoses']
+            if availabledoses < 0:
+                raise NotEnoughVaccine
+            print('Query executed successfully. {} dose(s) reserved'.format(doses))
+        except ValueError:
             print("Please add a positive integer. VACCINE NOT RESERVED")
         except pymssql.Error as db_err:
             print("Database Programming Error in SQL Query processing for COVID VACCINE (RESERVE DOSE)! ")

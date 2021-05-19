@@ -4,10 +4,10 @@ import traceback
 
 class SqlConnectionManager:
     def __init__(self, Server, DBname, UserId, Password):
-        self.Server = Server
-        self.DBname = DBname
-        self.UserId = UserId
-        self.Password = Password
+        self.Server = "data514server-sp.database.windows.net"
+        self.DBname = "DATA514dbMain"
+        self.UserId = 'sampereb'
+        self.Password = "Data514HW"
         self.SqlConnection = None
 
     def __enter__(self):

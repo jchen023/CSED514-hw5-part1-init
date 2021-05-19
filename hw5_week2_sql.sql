@@ -79,7 +79,6 @@ INSERT INTO PatientAppointmentStatusCodes (statusCodeId, StatusCode)
 	VALUES (7, 'Vaccination Complete');
 
 
-
 Create Table Patients(
 	PatientId int IDENTITY PRIMARY KEY,
 	PatientName varchar(50),
