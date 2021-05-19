@@ -100,7 +100,7 @@ class VaccinePatient:
 
             if self.secondAppointmentId >= 0:
                 print("Second Appointment", self.secondAppointmentId)
-            return self.caregiver_result
+
         except NotEnoughVaccine:
             print("There is no available vaccine dose available")
             cursor.connection.rollback()
@@ -176,50 +176,19 @@ class VaccinePatient:
             print("SQL text that resulted in an Error: " + sqltext)
 
     def ScheduleAppointment(self, cursor):
-        appt1 = self.caregiver_result
-        appt2 = self.appt2Result
-
-        print('A1',appt1)
-        print('A2',appt2)
-
-        vaccApptId1 = appt1['VaccineAppointmentId']
-        vaccApptId2 = appt2['VaccineAppointmentId']
-
-        #caregiverSlotStat = 2
 
         try:
+            #### Update CareGiverSchedule to scheduled from queued
             sqltext1 = "Update CareGiverSchedule Set SlotStatus = 2 WHERE CaregiverSlotSchedulingId = " \
-                        + str(appt1['CaregiverSlotSchedulingId']) + ";"
-
-            sqltext2 = "Update CareGiverSchedule Set SlotStatus = 2 WHERE CaregiverSlotSchedulingId = " \
-                        + str(appt2['CaregiverSlotSchedulingId']) + ";"
-
+                        + str(self.firstAppointmentId) + "and SlotStatus = 1;" + \
+                       "Update Patient Set VaccineStatus = 2 WHERE PatientId = " + self.PatientId + ";"
             cursor.execute(sqltext1)
             cursor.connection.commit()
-            cursor.execute(sqltext2)
-            cursor.connection.commit()
-
-            print('id', vaccApptId1, vaccApptId2)
-
-            sqltext3 = "SELECT * FROM VaccineAppointments WHERE VaccineAppointmentId = '"\
-                        + str(vaccApptId1) + "' OR VaccineAppointmentId =  '" + str(vaccApptId2) + "';"
-
-            cursor.execute(sqltext3)
-            vaccineAppts = cursor.fetchall()
-            print('Vacc:', vaccineAppts)
-            pId1 = vaccineAppts[0]['PatientId']
-            pId2 = vaccineAppts[1]['PatientId']
-
-            print(pId1, pId2)
-
-            sqltext4 = "Update Patient Set VaccineStatus = 2 WHERE PatientId = " + str(pId1) + ";"
-            sqltext5 = "Update Patient Set VaccineStatus = 5 WHERE PatientId = " + str(pId2) + ";"
-
-            cursor.execute(sqltext4)
-            cursor.connection.commit()
-
-            if not pId2:
-                cursor.execute(sqltext5)
+            if self.secondAppointmentId >= 0:
+                sqltext2 = "Update CareGiverSchedule Set SlotStatus = 2 WHERE CaregiverSlotSchedulingId = " \
+                            + str(self.secondAppointmentId) + ";" \
+                +" Update Patient Set VaccineStatus = 5 WHERE PatientId = " + self.PatientId + ";"
+                cursor.execute(sqltext2)
                 cursor.connection.commit()
 
         except pymssql.Error as db_err:
