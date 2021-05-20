@@ -172,8 +172,8 @@ class TestPart2(unittest.TestCase):
                     vaccRes_a = VaccineReserve()
 
                     caregiversList = []
-                    caregiversList.append(VaccineCaregiver('Carrie Nation', cursor))
-                    caregiversList.append(VaccineCaregiver('Clare Barton', cursor))
+                    caregiversList.append(VaccineCaregiver('Britta Perry', cursor))
+                    caregiversList.append(VaccineCaregiver('Troy Barnes', cursor))
                     caregivers = {}
                     for cg in caregiversList:
                         cgid = cg.caregiverId
@@ -185,12 +185,6 @@ class TestPart2(unittest.TestCase):
                                 
                     #print('in')
                     self.vaccine_a.AddDoses(1, cursor)
-                    
-                    #print(patient_a.CaregiverSchedId1, patient_a.PatientName)
-                    #print('out',vaccRes_a.PutHoldOnAppointmentSlot(cursor))
-                    #print('hi')
-                    #print(self.vaccine_a.vaccine)
-                    #print(vaccRes_a.PutHoldOnAppointmentSlot(cursor))
 
                     patient_a.ReserveAppointment( vaccRes_a.PutHoldOnAppointmentSlot(cursor), self.vaccine_a, cursor)
                     #print('finally')
@@ -209,6 +203,55 @@ class TestPart2(unittest.TestCase):
                     # clear the tables if an exception occurred
                     clear_tables(sqlClient)
                     self.fail("Reserving appt. 1 failed")
+
+    def test_ReserveAppt2(self):
+        with SqlConnectionManager(Server=os.getenv("Server"),
+                                  DBname=os.getenv("DBName"),
+                                  UserId=os.getenv("UserID"),
+                                  Password=os.getenv("Password")) as sqlClient:
+            with sqlClient.cursor(as_dict=True) as cursor:
+                try:
+                    # clear the tables before testing
+                    clear_tables(sqlClient)
+                    # create a new VaccineCaregiver object
+                    self.vaccine_a = covid(vaccine="Pfizer",
+                                                    cursor=cursor)
+                    
+                    patient_a = patient('Vladimir Putin', 0, cursor=cursor)
+                    vaccRes_a = VaccineReserve()
+
+                    caregiversList = []
+                    caregiversList.append(VaccineCaregiver('Jeffrey Winger', cursor))
+                    caregiversList.append(VaccineCaregiver('Annie Edison', cursor))
+                    caregivers = {}
+                    for cg in caregiversList:
+                        cgid = cg.caregiverId
+                        caregivers[cgid] = cg
+
+                    # check if the patient is correctly inserted into the database
+                    sqlQuery = "SELECT * FROM VaccineAppointments WHERE VaccineName = 'Pfizer' AND PatientId = "+\
+                            str(patient_a.PatientId) +";"
+                                
+                    #print('in')
+                    self.vaccine_a.AddDoses(2, cursor)
+
+                    patient_a.ReserveAppointment( vaccRes_a.PutHoldOnAppointmentSlot(cursor), self.vaccine_a, cursor)
+                    #print('finally')
+                    
+                    
+                    cursor.execute(sqlQuery)
+                    rows = cursor.fetchall()
+
+                    
+                    if rows[1]['SlotStatus'] != 1 or len(rows) != 2:
+                        self.fail("Reserving appt. 2 failed")
+
+                    clear_tables(sqlClient)
+
+                except Exception:
+                    # clear the tables if an exception occurred
+                    clear_tables(sqlClient)
+                    self.fail("Reserving appt. 2 failed")
 
 
 
