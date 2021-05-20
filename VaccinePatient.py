@@ -140,7 +140,6 @@ class VaccinePatient:
         date = appt1['WorkDay']
         lowerD = date + timedelta(days=21)
         upperD = date + timedelta(days=42)
-        self.secondAppointmentId = -1
         try:
             # Checking if the slot is on hold
             sqltext = ("select * from CareGiverSchedule where WorkDay >= '"

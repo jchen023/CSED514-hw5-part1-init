@@ -29,15 +29,17 @@ class VaccineReservationScheduler:
         self.slotSchedulingId = -2
         self.getAppointmentSQL = "SELECT * FROM CareGiverSchedule WHERE SlotStatus = 0 ORDER BY WorkDay, SlotHour;"
         try:
+            #print('new1')
             cursor.execute(self.getAppointmentSQL)
             rows = cursor.fetchone()
             self.slotSchedulingId = rows['CaregiverSlotSchedulingId']
-
+            #print("new2")
             if rows:
                 sqlText = "Update CareGiverSchedule Set SlotStatus = 1 WHERE CaregiverSlotSchedulingId =" \
                           + str(rows['CaregiverSlotSchedulingId']) + "and SlotStatus = 0;"
                 cursor.execute(sqlText)
                 cursor.connection.commit()
+            #print('new3')
             return self.slotSchedulingId
 
         except pymssql.Error as db_err:
