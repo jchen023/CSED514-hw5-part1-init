@@ -44,6 +44,9 @@ class VaccinePatient:
             cursor.execute(sqltext)
             caregiver_result = cursor.fetchone()
             slotStatus = caregiver_result['SlotStatus']
+
+            self.CaregiverSchedId1 = caregiver_result['CaregiverSchedulingID']
+
             if slotStatus != 1:
                 raise ValueError()
 
@@ -129,6 +132,8 @@ class VaccinePatient:
                         "' AND SlotStatus = 0 ORDER BY WorkDay, SlotHour;")
             cursor.execute(sqltext)
             appt2Result = cursor.fetchone()
+
+            self.CaregiverSchedId2 = appt2Result['CaregiverSchedulingID']
             if not appt2Result:
                 print("we have reserved your first appointment but there is not second appointment slot available.")
 
