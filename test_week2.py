@@ -41,8 +41,18 @@ class TestPart2(unittest.TestCase):
                     cgid = cg.caregiverId
                     caregivers[cgid] = cg
 
+                dbcursor_patient = sqlClient.cursor(as_dict=True)
 
+                patientcursor = []
+                for _ in range(5):
+                    patientcursor.append(sqlClient.cursor(as_dict=True))
 
+                patientsList = []
+                patientsList.append(patient('Ben Bernanke', 0))
+                patients = {}
+                for pt in patientsList:
+                    ptid = pt.PatientId
+                    patients[ptid] = pt
 
             # patients = []
             # for _ in range(5):
