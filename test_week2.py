@@ -60,11 +60,11 @@ class TestPart2(unittest.TestCase):
             #     patients.append()
             #
 
-                    clear_tables(sqlClient)
-                except Exception:
+                clear_tables(sqlClient)
+            except Exception:
                     # clear the tables if an exception occurred
-                    clear_tables(sqlClient)
-                    self.fail("Failing FiveDosesTwoCareGiversFivePatients")
+                clear_tables(sqlClient)
+                self.fail("Failing FiveDosesTwoCareGiversFivePatients")
 
     def testAdd_dose(self):
 
@@ -239,7 +239,7 @@ class TestPart2(unittest.TestCase):
                     rows2 = cursor.fetchall()
                     #print(rows2)
                     if rows2[0]['VaccineStatus'] != 1:
-                        self.fail("Reserving appt. 1 failed")
+                        self.fail("Reserving appt. 2 failed")
 
                     clear_tables(sqlClient)
 
