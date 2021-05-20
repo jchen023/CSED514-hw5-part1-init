@@ -176,18 +176,22 @@ class VaccinePatient:
             print("SQL text that resulted in an Error: " + sqltext)
 
     def ScheduleAppointment(self, cursor):
-
+        # Vaccines' Inventory is handled in the reservation function as this felt more logical to us. 
         try:
             #### Update CareGiverSchedule to scheduled from queued
             sqltext1 = "Update CareGiverSchedule Set SlotStatus = 2 WHERE CaregiverSlotSchedulingId = " \
                         + str(self.firstAppointmentId) + "and SlotStatus = 1;" + \
-                       "Update Patients Set VaccineStatus = 2 WHERE PatientId = " + str(self.PatientId) + ";"
+                       "Update Patients Set VaccineStatus = 2 WHERE PatientId = " + str(self.PatientId) + \
+                           "AND VaccineStatus = 1;" +\
+                        " Update VaccineAppointments Set SlotStatus = 2 WHERE VaccineAppointmentId  = "+ self.firstAppointmentId+" AND SlotStatus = 1;"
             cursor.execute(sqltext1)
             cursor.connection.commit()
             if self.secondAppointmentId >= 0:
                 sqltext2 = "Update CareGiverSchedule Set SlotStatus = 2 WHERE CaregiverSlotSchedulingId = " \
-                            + str(self.secondAppointmentId) + ";" \
-                +" Update Patients Set VaccineStatus = 5 WHERE PatientId = " + str(self.PatientId) + ";"
+                        + str(self.firstAppointmentId) + "and SlotStatus = 1;" + \
+                       "Update Patients Set VaccineStatus = 5 WHERE PatientId = " + str(self.PatientId) + \
+                           "AND VaccineStatus = 4;" +\
+                        " Update VaccineAppointments Set SlotStatus = 2 WHERE VaccineAppointmentId  = "+ self.secondAppointmentId+" AND SlotStatus = 1;"
                 cursor.execute(sqltext2)
                 cursor.connection.commit()
 
