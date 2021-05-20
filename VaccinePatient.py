@@ -45,7 +45,7 @@ class VaccinePatient:
             caregiver_result = cursor.fetchone()
             slotStatus = caregiver_result['SlotStatus']
 
-            self.CaregiverSchedId1 = caregiver_result['CaregiverSchedulingID']
+            #self.CaregiverSchedId1 = caregiver_result['CaregiverSchedulingID']
 
             if slotStatus != 1:
                 raise ValueError()
@@ -139,7 +139,7 @@ class VaccinePatient:
             cursor.execute(sqltext)
             appt2Result = cursor.fetchone()
 
-            self.CaregiverSchedId2 = appt2Result['CaregiverSchedulingID']
+            self.CaregiverSchedId2 = appt2Result['CaregiverSlotSchedulingId']
             if not appt2Result:
                 raise NotEnoughVaccine
             self.secondCareGiverSchedulingId = appt2Result['CaregiverSlotSchedulingId']
