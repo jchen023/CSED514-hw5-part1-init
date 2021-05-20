@@ -176,9 +176,8 @@ class VaccinePatient:
             print("SQL text that resulted in an Error: " + sqltext)
 
     def ScheduleAppointment(self, cursor):
-        # Vaccines' Inventory is handled in the reservation function as this felt more logical to us. 
+        # Vaccines Inventory is handled in the reservation function.
         try:
-            #### Update CareGiverSchedule to scheduled from queued
             sqltext1 = "Update CareGiverSchedule Set SlotStatus = 2 WHERE VaccineAppointmentId = " \
                         + str(self.firstAppointmentId) + "and SlotStatus = 1;" + \
                        "Update Patients Set VaccineStatus = 2 WHERE PatientId = " + str(self.PatientId) + \
