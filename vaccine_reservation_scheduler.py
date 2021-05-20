@@ -120,7 +120,7 @@ if __name__ == '__main__':
             p1.ReserveAppointment(vrs.PutHoldOnAppointmentSlot(dbcursor_1), moderna, dbcursor_1)
             p1.ScheduleAppointment(dbcursor_1)
 
-            p2 = patient('Janet Yellen', 0, dbcursor_2)
+            p2 = patient('Janet Yellen', 4, dbcursor_2)
             p2.ReserveAppointment(vrs.PutHoldOnAppointmentSlot(dbcursor_2), moderna, dbcursor_2)
             p2.ScheduleAppointment(dbcursor_2)
             # Add a vaccine and Add doses to inventory of the vaccine

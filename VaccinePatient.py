@@ -8,6 +8,9 @@ import os
 class NotEnoughVaccine(Exception):
     pass
 
+class DoneWithVaccine(Exception):
+    pass
+
 class VaccinePatient:
     def __init__(self, PatientName, PatientStatusCode, cursor):
         try:
@@ -19,6 +22,7 @@ class VaccinePatient:
             self.PatientId = 0
             self.PatientName = PatientName
             self.PatientStatusCode = PatientStatusCode
+            self.firstAppointmentId, self.secondAppointmentId = -1, -1
 
             cursor.execute(self.sqltext)
             cursor.connection.commit()
@@ -38,65 +42,73 @@ class VaccinePatient:
 
     def ReserveAppointment(self, CaregiverSchedulingID, Vaccine, cursor):
         try:
-            # Checking if the slot is on hold
-            sqltext = ("select * from CareGiverSchedule where CaregiverSlotSchedulingId = %d"
-                       % (CaregiverSchedulingID))
-            cursor.execute(sqltext)
-            caregiver_result = cursor.fetchone()
-            slotStatus = caregiver_result['SlotStatus']
+            if self.PatientStatusCode >= 4:
+                raise DoneWithVaccine
 
-            #self.CaregiverSchedId1 = caregiver_result['CaregiverSchedulingID']
+            if self.PatientStatusCode == 0:
+                # This is the part where we let others schedule their first dose
+                # If they already have scheduled their first dose, their status code would be 1
+                # and would go on to trying to schedule their second dose, after the if statement.
+                # This is, of course, based on the fact that we would put status code for
+                # patients who received one dose vaccine as "two-dose received" to avoid any confusion.
 
-            if slotStatus != 1:
-                raise ValueError()
-            self.firstCareGiverSchedulingId = CaregiverSchedulingID
+                # Checking if the slot is on hold
+                sqltext = ("select * from CareGiverSchedule where CaregiverSlotSchedulingId = %d"
+                           % (CaregiverSchedulingID))
+                cursor.execute(sqltext)
+                caregiver_result = cursor.fetchone()
+                slotStatus = caregiver_result['SlotStatus']
+                if slotStatus != 1:
+                    raise ValueError()
+                self.firstCareGiverSchedulingId = CaregiverSchedulingID
 
-            # Reserving Vaccine Doses
-            sqltext = "select * from Vaccines where VaccineName = '{}'".format(Vaccine.vaccine)
-            cursor.execute(sqltext)
-            vaccine_result = cursor.fetchone()
-            dosesPerPatient = vaccine_result["DosesPerPatient"]
-            availableDoses = vaccine_result.get("AvailableDoses", 0)
-            if not availableDoses:
-                raise NotEnoughVaccine
+                # Reserving Vaccine Doses
+                sqltext = "select * from Vaccines where VaccineName = '{}'".format(Vaccine.vaccine)
+                cursor.execute(sqltext)
+                vaccine_result = cursor.fetchone()
+                dosesPerPatient = vaccine_result["DosesPerPatient"]
+                availableDoses = vaccine_result.get("AvailableDoses", 0)
+                if not availableDoses:
+                    raise NotEnoughVaccine
 
-            # Initial Entry in the Vaccine Appointment Table of the FIRST DOSE
-            VaccineName = Vaccine.vaccine
-            CaregiverId = caregiver_result['CaregiverId']
-            ReservationDate = caregiver_result['WorkDay']
-            ReservationStartHour = caregiver_result["SlotHour"]
-            ReservationStartMinute = caregiver_result["SlotMinute"]
-            AppointmentDuration = 15
-            SlotStatus = 1
-            DoseNumber = 1
+                # Initial Entry in the Vaccine Appointment Table of the FIRST DOSE
+                VaccineName = Vaccine.vaccine
+                CaregiverId = caregiver_result['CaregiverId']
+                ReservationDate = caregiver_result['WorkDay']
+                ReservationStartHour = caregiver_result["SlotHour"]
+                ReservationStartMinute = caregiver_result["SlotMinute"]
+                AppointmentDuration = 15
+                SlotStatus = 1
+                DoseNumber = 1
 
-            sqltext = "UPDATE Patients SET VaccineStatus = 1 WHERE PatientId = {}".format(self.PatientId)
-            cursor.execute(sqltext)
-            cursor.connection.commit()
+                sqltext = "UPDATE Patients SET VaccineStatus = 1 WHERE PatientId = {}".format(self.PatientId)
+                cursor.execute(sqltext)
+                cursor.connection.commit()
+                self.PatientStatusCode = 1
 
-            Vaccine.ReserveDoses(1, cursor)
+                Vaccine.ReserveDoses(1, cursor)
 
-            sqltext = ("INSERT INTO VaccineAppointments (VaccineName, PatientId, CaregiverId, ReservationDate, " +
-                       "ReservationStartHour, ReservationStartMinute, AppointmentDuration, SlotStatus, DoseNumber)  " +
-                       "Values ('{}', {}, {}, '{}', {}, {}, {}, {}, {})".format(VaccineName, self.PatientId, CaregiverId,
-                        ReservationDate, ReservationStartHour, ReservationStartMinute, AppointmentDuration, SlotStatus, DoseNumber))
-            cursor.execute(sqltext)
-            cursor.connection.commit()
-            cursor.execute("SELECT @@IDENTITY AS 'Identity'; ")
-            self.firstAppointmentId = cursor.fetchone()['Identity']
+                sqltext = ("INSERT INTO VaccineAppointments (VaccineName, PatientId, CaregiverId, ReservationDate, " +
+                           "ReservationStartHour, ReservationStartMinute, AppointmentDuration, SlotStatus, DoseNumber)  " +
+                           "Values ('{}', {}, {}, '{}', {}, {}, {}, {}, {})".format(VaccineName, self.PatientId, CaregiverId,
+                            ReservationDate, ReservationStartHour, ReservationStartMinute, AppointmentDuration, SlotStatus, DoseNumber))
+                cursor.execute(sqltext)
+                cursor.connection.commit()
+                cursor.execute("SELECT @@IDENTITY AS 'Identity'; ")
+                self.firstAppointmentId = cursor.fetchone()['Identity']
 
-            sqltext = "Update CareGiverSchedule Set VaccineAppointmentId = {} WHERE CaregiverSlotSchedulingId = {} and SlotStatus = 1;" \
-                .format(self.firstAppointmentId, CaregiverSchedulingID)
-            cursor.execute(sqltext)
-            cursor.connection.commit()
+                sqltext = "Update CareGiverSchedule Set VaccineAppointmentId = {} WHERE CaregiverSlotSchedulingId = {} and SlotStatus = 1;" \
+                    .format(self.firstAppointmentId, CaregiverSchedulingID)
+                cursor.execute(sqltext)
+                cursor.connection.commit()
 
-            print("{}'s First Appointment ID: {}; CareGiverScheduler ID: {}".format(self.PatientName,
-                                                                                    self.firstAppointmentId,
-                                                                                    self.firstCareGiverSchedulingId))
+                print("{}'s First Appointment ID: {}; CareGiverScheduler ID: {}".format(self.PatientName,
+                                                                                        self.firstAppointmentId,
+                                                                                        self.firstCareGiverSchedulingId))
 
-            # Initial Entry in the Vaccine Appointment Table of the SECOND DOSE
-            if dosesPerPatient != 2:
-                return
+                # Initial Entry in the Vaccine Appointment Table of the SECOND DOSE
+                if dosesPerPatient != 2:
+                    return
 
             with SqlConnectionManager(Server=os.getenv("Server"),
                 DBname=os.getenv("DBName"),
@@ -113,6 +125,10 @@ class VaccinePatient:
             print("There is no available vaccine dose available")
             cursor.connection.rollback()
             self.firstAppointmentId, self.firstCareGiverSchedulingId = -1, -1
+        except DoneWithVaccine:
+            cursor.connection.rollback()
+            print("{} has already scheduled both vaccines, please patiently wait for your booster shot.".format(
+                self.PatientName))
         except ValueError:
             print("The slot is not currently on hold...")
             cursor.connection.rollback()
@@ -130,7 +146,6 @@ class VaccinePatient:
         date = appt1['WorkDay']
         lowerD = date + timedelta(days=21)
         upperD = date + timedelta(days=42)
-        self.secondAppointmentId = -1
         try:
             # Checking if the slot is on hold
             sqltext = ("select * from CareGiverSchedule where WorkDay >= '"
@@ -138,8 +153,6 @@ class VaccinePatient:
                         "' AND SlotStatus = 0 ORDER BY WorkDay, SlotHour;")
             cursor.execute(sqltext)
             appt2Result = cursor.fetchone()
-
-            self.CaregiverSchedId2 = appt2Result['CaregiverSlotSchedulingId']
             if not appt2Result:
                 raise NotEnoughVaccine
             self.secondCareGiverSchedulingId = appt2Result['CaregiverSlotSchedulingId']
@@ -191,14 +204,15 @@ class VaccinePatient:
     def ScheduleAppointment(self, cursor):
         # Vaccines Inventory is handled in the reservation function.
         try:
-            sqltext1 = "Update CareGiverSchedule Set SlotStatus = 2 WHERE CaregiverSlotSchedulingId = " \
-                        + str(self.firstCareGiverSchedulingId) + "and SlotStatus = 1;" + \
-                       "Update Patients Set VaccineStatus = 2 WHERE PatientId = " + str(self.PatientId) + \
-                           "AND VaccineStatus = 1;" +\
-                        " Update VaccineAppointments Set SlotStatus = 2 WHERE VaccineAppointmentId  = "+ \
-                       str(self.firstAppointmentId) + " AND SlotStatus = 1;"
-            cursor.execute(sqltext1)
-            cursor.connection.commit()
+            if self.firstAppointmentId >= 0:
+                sqltext1 = "Update CareGiverSchedule Set SlotStatus = 2 WHERE CaregiverSlotSchedulingId = " \
+                            + str(self.firstCareGiverSchedulingId) + "and SlotStatus = 1;" + \
+                           "Update Patients Set VaccineStatus = 2 WHERE PatientId = " + str(self.PatientId) + \
+                               "AND VaccineStatus = 1;" +\
+                            " Update VaccineAppointments Set SlotStatus = 2 WHERE VaccineAppointmentId  = "+ \
+                           str(self.firstAppointmentId) + " AND SlotStatus = 1;"
+                cursor.execute(sqltext1)
+                cursor.connection.commit()
             if self.secondAppointmentId >= 0:
                 sqltext2 = "Update CareGiverSchedule Set SlotStatus = 2 WHERE CaregiverSlotSchedulingId = " \
                         + str(self.secondCareGiverSchedulingId) + "and SlotStatus = 1;" + \
