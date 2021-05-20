@@ -9,8 +9,8 @@ from COVID19_vaccine import COVID19Vaccine as covid
 from COVID19_vaccine import COVID19Vaccine as covid
 from VaccinePatient import VaccinePatient as patient
 
-class Test(unittest.TestCase):
-    def testVaccine_init(self):
+class Part2Test(unittest.TestCase):
+    def FiveDosesTwoCareGiverFivePatient(self):
         with SqlConnectionManager(Server=os.getenv("Server"),
                                       DBname=os.getenv("DBName"),
                                       UserId=os.getenv("UserID"),
