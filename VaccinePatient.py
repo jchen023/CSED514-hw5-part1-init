@@ -8,6 +8,9 @@ import os
 class NotEnoughVaccine(Exception):
     pass
 
+class DoneWithVaccine(Exception):
+    pass
+
 class VaccinePatient:
     def __init__(self, PatientName, PatientStatusCode, cursor):
         try:
@@ -19,6 +22,7 @@ class VaccinePatient:
             self.PatientId = 0
             self.PatientName = PatientName
             self.PatientStatusCode = PatientStatusCode
+            self.firstAppointmentId, self.secondAppointmentId = -1, -1
 
             cursor.execute(self.sqltext)
             cursor.connection.commit()
@@ -38,10 +42,8 @@ class VaccinePatient:
 
     def ReserveAppointment(self, CaregiverSchedulingID, Vaccine, cursor):
         try:
-            if self.patientStatusCode >= 4:
-                cursor.connection.rollback()
-                print("{} has already scheduled both vaccines, please patiently wait for your booster shot.".format(self.PatientName))
-                return
+            if self.PatientStatusCode >= 4:
+                raise DoneWithVaccine
 
             if self.PatientStatusCode == 0:
                 # This is the part where we let others schedule their first dose
@@ -123,6 +125,10 @@ class VaccinePatient:
             print("There is no available vaccine dose available")
             cursor.connection.rollback()
             self.firstAppointmentId, self.firstCareGiverSchedulingId = -1, -1
+        except DoneWithVaccine:
+            cursor.connection.rollback()
+            print("{} has already scheduled both vaccines, please patiently wait for your booster shot.".format(
+                self.PatientName))
         except ValueError:
             print("The slot is not currently on hold...")
             cursor.connection.rollback()
@@ -198,14 +204,15 @@ class VaccinePatient:
     def ScheduleAppointment(self, cursor):
         # Vaccines Inventory is handled in the reservation function.
         try:
-            sqltext1 = "Update CareGiverSchedule Set SlotStatus = 2 WHERE CaregiverSlotSchedulingId = " \
-                        + str(self.firstCareGiverSchedulingId) + "and SlotStatus = 1;" + \
-                       "Update Patients Set VaccineStatus = 2 WHERE PatientId = " + str(self.PatientId) + \
-                           "AND VaccineStatus = 1;" +\
-                        " Update VaccineAppointments Set SlotStatus = 2 WHERE VaccineAppointmentId  = "+ \
-                       str(self.firstAppointmentId) + " AND SlotStatus = 1;"
-            cursor.execute(sqltext1)
-            cursor.connection.commit()
+            if self.firstAppointmentId >= 0:
+                sqltext1 = "Update CareGiverSchedule Set SlotStatus = 2 WHERE CaregiverSlotSchedulingId = " \
+                            + str(self.firstCareGiverSchedulingId) + "and SlotStatus = 1;" + \
+                           "Update Patients Set VaccineStatus = 2 WHERE PatientId = " + str(self.PatientId) + \
+                               "AND VaccineStatus = 1;" +\
+                            " Update VaccineAppointments Set SlotStatus = 2 WHERE VaccineAppointmentId  = "+ \
+                           str(self.firstAppointmentId) + " AND SlotStatus = 1;"
+                cursor.execute(sqltext1)
+                cursor.connection.commit()
             if self.secondAppointmentId >= 0:
                 sqltext2 = "Update CareGiverSchedule Set SlotStatus = 2 WHERE CaregiverSlotSchedulingId = " \
                         + str(self.secondCareGiverSchedulingId) + "and SlotStatus = 1;" + \

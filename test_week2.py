@@ -1,4 +1,4 @@
-from VaccinePatient import NotEnoughVaccine, VaccinePatient
+from VaccinePatient import NotEnoughVaccine, DoneWithVaccine, VaccinePatient
 import unittest
 import os
 from sql_connection_manager import SqlConnectionManager
