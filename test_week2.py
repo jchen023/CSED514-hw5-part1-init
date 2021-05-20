@@ -185,16 +185,20 @@ class TestPart2(unittest.TestCase):
                                 
                     #print('in')
                     self.vaccine_a.AddDoses(1, cursor)
-
                     patient_a.ReserveAppointment( vaccRes_a.PutHoldOnAppointmentSlot(cursor), self.vaccine_a, cursor)
+                    
                     #print('finally')
-                    
-                    
                     cursor.execute(sqlQuery)
                     rows = cursor.fetchall()
 
-                    #print('hihi',rows)
                     if rows[0]['SlotStatus'] != 1:
+                        self.fail("Reserving appt. 1 failed")
+
+                    sqltext2 = "SELECT * FROM PATIENTS WHERE PatientId = " + str(patient_a.PatientId) + ";"
+                    cursor.execute(sqltext2)
+                    rows2 = cursor.fetchall()
+                    #print(rows2)
+                    if rows2[0]['VaccineStatus'] != 1:
                         self.fail("Reserving appt. 1 failed")
 
                     clear_tables(sqlClient)
@@ -245,6 +249,13 @@ class TestPart2(unittest.TestCase):
                     
                     if rows[1]['SlotStatus'] != 1 or len(rows) != 2:
                         self.fail("Reserving appt. 2 failed")
+
+                    sqltext2 = "SELECT * FROM PATIENTS WHERE PatientId = " + str(patient_a.PatientId) + ";"
+                    cursor.execute(sqltext2)
+                    rows2 = cursor.fetchall()
+                    #print(rows2)
+                    if rows2[0]['VaccineStatus'] != 1:
+                        self.fail("Reserving appt. 1 failed")
 
                     clear_tables(sqlClient)
 
