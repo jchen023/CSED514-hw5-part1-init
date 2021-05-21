@@ -122,7 +122,7 @@ class VaccinePatient:
                                                                                         self.secondAppointmentId,
                                                                                         self.secondCareGiverSchedulingId))
         except NotEnoughVaccine:
-            print("There is no available vaccine dose available")
+            print("There is no available vaccine dose available for {}".format(self.PatientName))
             cursor.connection.rollback()
             self.firstAppointmentId, self.firstCareGiverSchedulingId = -1, -1
         except DoneWithVaccine:

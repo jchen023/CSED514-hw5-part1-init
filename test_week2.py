@@ -44,21 +44,122 @@ class TestPart2(unittest.TestCase):
 
                 dbcursor_patient = sqlClient.cursor(as_dict=True)
 
-                patientcursor = []
+                patientscursor = []
                 for _ in range(5):
-                    patientcursor.append(sqlClient.cursor(as_dict=True))
+                    patientscursor.append(sqlClient.cursor(as_dict=True))
 
                 patientsList = []
-                patientsList.append(patient('Ben Bernanke', 0))
+                patientName = ('Charlie T. Munger', 'Ben Bernanke', 'Janet Yellen', 'Jorome Powell', 'Benjamin Graham')
+                patientsList.append(patient('Charlie T. Munger', 0, dbcursor_patient))
+                patientsList.append(patient('Ben Bernanke', 0, dbcursor_patient))
+                patientsList.append(patient('Janet Yellen', 0, dbcursor_patient))
+                patientsList.append(patient('Jorome Powell', 0, dbcursor_patient))
+                patientsList.append(patient('Benjamin Graham', 0, dbcursor_patient))
                 patients = {}
                 for pt in patientsList:
                     ptid = pt.PatientId
                     patients[ptid] = pt
 
-            # patients = []
-            # for _ in range(5):
-            #     patients.append()
-            #
+                vrs = VaccineReserve()
+                cursor = sqlClient.cursor(as_dict=True)
+                for i in range(5):
+                    patientsList[i].ReserveAppointment(vrs.PutHoldOnAppointmentSlot(patientscursor[i]), pfizer, patientscursor[i])
+
+                    # Test reserve doses on vaccines table
+                    cursor.execute("select * from vaccines where vaccineName = 'Pfizer'")
+                    vaccine_result = cursor.fetchall()
+                    self.assertEqual(len(vaccine_result), 1)
+                    self.assertEqual(vaccine_result[0]["AvailableDoses"], max(0, 5 - 2 - i * 2))
+                    self.assertEqual(vaccine_result[0]["TotalDoses"], 5)
+                    self.assertEqual(vaccine_result[0]["ReservedDoses"], min(5, 2 + i * 2))
+
+                    # Test reserve doses on caregivers table
+                    cursor.execute("select * from caregivers")
+                    caregiver_result = cursor.fetchall()
+                    self.assertEqual(len(caregiver_result), 2)
+                    self.assertEqual(caregiver_result[0]["CaregiverName"], 'Barack Obama')
+                    self.assertEqual(caregiver_result[1]["CaregiverName"], 'Joseph Biden')
+
+                    # Test reserve doses on Patients table
+                    cursor.execute("select * from patients")
+                    patient_result = cursor.fetchall()
+                    self.assertEqual(len(patient_result), 5)
+                    for j in range(5):
+                        self.assertEqual(patient_result[j]["PatientName"], patientName[j])
+                    cursor.execute("select * from patients where VaccineStatus = 1")
+                    patient_scheduled_result = cursor.fetchall()
+                    self.assertEqual(len(patient_scheduled_result), 1 if i <= 2 else 0)
+
+
+                    # Test reserve doses on Caregiver Schedule
+                    cursor.execute("select * from CareGiverSchedule where SlotStatus = 1 and VaccineAppointmentId IS NOT NULL")
+                    schedule_result = cursor.fetchall()
+                    if i <= 1:
+                        self.assertEqual(len(schedule_result), 2)
+                    elif i == 2:
+                        self.assertEqual(len(schedule_result), 1)
+                    else:
+                        self.assertEqual(len(schedule_result), 0)
+
+                    # Test reserve doses on vaccine appointment
+                    cursor.execute(
+                        "select * from VaccineAppointments where SlotStatus = 1 and VaccineAppointmentId IS NOT NULL")
+                    appointment_result = cursor.fetchall()
+                    if i <= 1:
+                        self.assertEqual(len(appointment_result), 2)
+                    elif i == 2:
+                        self.assertEqual(len(appointment_result), 1)
+                    else:
+                        self.assertEqual(len(appointment_result), 0)
+
+                    # Test the sets of vaccine appointment id from caregiver schedule and vaccine appointment tables are the same
+                    appointmentIdSet_cg = set((x["VaccineAppointmentId"] for x in schedule_result))
+                    appointmentIdSet_va = set((x["VaccineAppointmentId"] for x in appointment_result))
+                    self.assertEqual(appointmentIdSet_cg, appointmentIdSet_va)
+
+                    patientsList[i].ScheduleAppointment(patientscursor[i])
+
+                    # Test schedule doses on vaccines table
+                    cursor.execute("select * from vaccines where vaccineName = 'Pfizer'")
+                    vaccine_result = cursor.fetchall()
+                    self.assertEqual(len(vaccine_result), 1)
+                    self.assertEqual(vaccine_result[0]["AvailableDoses"], max(0, 5 - 2 - i * 2))
+                    self.assertEqual(vaccine_result[0]["TotalDoses"], 5)
+                    self.assertEqual(vaccine_result[0]["ReservedDoses"], min(5, 2 + i * 2))
+
+                    # Test schedule doses on caregivers table
+                    cursor.execute("select * from caregivers")
+                    caregiver_result = cursor.fetchall()
+                    self.assertEqual(len(caregiver_result), 2)
+                    self.assertEqual(caregiver_result[0]["CaregiverName"], 'Barack Obama')
+                    self.assertEqual(caregiver_result[1]["CaregiverName"], 'Joseph Biden')
+
+                    # Test schedule doses on Patients table
+                    cursor.execute("select * from patients")
+                    patient_result = cursor.fetchall()
+                    self.assertEqual(len(patient_result), 5)
+                    for j in range(5):
+                        self.assertEqual(patient_result[j]["PatientName"], patientName[j])
+                    cursor.execute("select * from patients where VaccineStatus = 2")
+                    patient_scheduled_result = cursor.fetchall()
+                    self.assertEqual(len(patient_scheduled_result), min(i + 1, 3))
+
+                    # Test schedule doses on Caregiver Schedule
+                    cursor.execute(
+                        "select * from CareGiverSchedule where SlotStatus = 2 and VaccineAppointmentId IS NOT NULL")
+                    schedule_result = cursor.fetchall()
+                    self.assertEqual(len(schedule_result), min(5, 2 + i * 2))
+
+                    # Test schedule doses on vaccine appointment
+                    cursor.execute(
+                        "select * from VaccineAppointments where SlotStatus = 2 and VaccineAppointmentId IS NOT NULL")
+                    appointment_result = cursor.fetchall()
+                    self.assertEqual(len(appointment_result), min(5, 2 + i * 2))
+
+                    # Test the sets of vaccine appointment id from caregiver schedule and vaccine appointment tables are the same
+                    appointmentIdSet_cg = set((x["VaccineAppointmentId"] for x in schedule_result))
+                    appointmentIdSet_va = set((x["VaccineAppointmentId"] for x in appointment_result))
+                    self.assertEqual(appointmentIdSet_cg, appointmentIdSet_va)
 
                 clear_tables(sqlClient)
             except Exception:
@@ -123,7 +224,7 @@ class TestPart2(unittest.TestCase):
                                 '''
 
                     self.vaccine_a.AddDoses(4, cursor)
-                    
+
                     self.vaccine_a.ReserveDoses(1, cursor)
 
                     cursor.execute(sqlQuery)
@@ -166,11 +267,11 @@ class TestPart2(unittest.TestCase):
                     # check if the patient is correctly inserted into the database
                     sqlQuery = "SELECT * FROM VaccineAppointments WHERE VaccineName = 'Pfizer' AND PatientId = "+\
                             str(patient_a.PatientId) +";"
-                                
+
                     #print('in')
                     self.vaccine_a.AddDoses(1, cursor)
                     patient_a.ReserveAppointment( vaccRes_a.PutHoldOnAppointmentSlot(cursor), self.vaccine_a, cursor)
-                    
+
                     #print('finally')
                     cursor.execute(sqlQuery)
                     rows = cursor.fetchall()
