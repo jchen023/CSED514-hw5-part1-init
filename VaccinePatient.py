@@ -42,7 +42,7 @@ class VaccinePatient:
 
     def ReserveAppointment(self, CaregiverSchedulingID, Vaccine, cursor):
         try:
-            if self.PatientStatusCode >= 4:
+            if self.PatientStatusCode >= 7:  # probably replace 4 with 7
                 raise DoneWithVaccine
 
             if self.PatientStatusCode == 0:
