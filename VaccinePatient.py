@@ -129,6 +129,7 @@ class VaccinePatient:
             cursor.connection.rollback()
             print("{} has already scheduled both vaccines, please patiently wait for your booster shot.".format(
                 self.PatientName))
+            raise DoneWithVaccine
         except ValueError:
             print("The slot is not currently on hold...")
             cursor.connection.rollback()

@@ -455,14 +455,68 @@ class TestPart2(unittest.TestCase):
 
                     self.vaccine_a.AddDoses(2, cursor)
                     
-                    # with self.assertRaises(Exception):  # replace exception with DoneWithVaccine
-                    #      patient_a.ReserveAppointment(vaccRes_a.PutHoldOnAppointmentSlot(cursor), self.vaccine_a, cursor)
+                    with self.assertRaises(DoneWithVaccine):  # replace exception with DoneWithVaccine
+                        patient_a.ReserveAppointment(vaccRes_a.PutHoldOnAppointmentSlot(cursor), self.vaccine_a, cursor)
+                    
                     # if patient_a.PatientStatusCode >= 7:
                     #     self.fail("Dont try to get vaccinated again")
                     clear_tables(sqlClient)
                 except Exception:
                     clear_tables(sqlClient)
                     self.fail("Vaccine Status Code Error")
+    
+    def test_rollback(self):
+        with SqlConnectionManager(Server=os.getenv("Server"),
+                                  DBname=os.getenv("DBName"),
+                                  UserId=os.getenv("UserID"),
+                                  Password=os.getenv("Password")) as sqlClient:
+            with sqlClient.cursor(as_dict=True) as cursor:
+                try:
+                    # clear the tables before testing
+                    clear_tables(sqlClient)
+                    # create a new VaccineCaregiver object
+                    self.vaccine_a = covid(vaccine="Moderna",
+                                                    cursor=cursor)
+
+                    # I think we are confusing patientstatuscode(0-7) with vaccinestatus(0-4) -> similar prob in donewithvaccine exeption.
+                    patient_a = patient('Hugh Heffner', 0, cursor=cursor)
+                    vaccRes_a = VaccineReserve()
+
+                    caregiversList = []
+                    caregiversList.append(VaccineCaregiver('Hendrik Lenstra', cursor))
+                    caregiversList.append(VaccineCaregiver('Leonardo DiCaprio', cursor))
+                    caregivers = {}
+                    for cg in caregiversList:
+                        cgid = cg.caregiverId
+                        caregivers[cgid] = cg
+
+                
+                    self.vaccine_a.AddDoses(2, cursor)
+                    patient_a.ReserveAppointment(vaccRes_a.PutHoldOnAppointmentSlot(cursor), self.vaccine_a, cursor)
+                    
+                    patient_a.ScheduleAppointment(cursor)
+                    cursor.connection.rollback()
+
+                    sqltext1 = "SELECT * FROM VaccineAppointments WHERE VaccineAppointmentId  = "+ \
+                           str(patient_a.firstAppointmentId) + ";"
+                    cursor.execute(sqltext1)
+                    rows1 = cursor.fetchall()
+                    print(rows1)
+
+                    sqltext2 = "SELECT * FROM VaccineAppointments WHERE VaccineAppointmentId  = "+ \
+                           str(patient_a.secondAppointmentId) + ";"
+                    cursor.execute(sqltext2)
+                    rows2 = cursor.fetchall()
+                    print(rows2)
+
+                    #cursor.rollback()
+                except(Exception):
+                    clear_tables(sqlClient)
+                    self.fail("Rollback Error")
+
+
+
+        
 
 
 
