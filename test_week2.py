@@ -11,6 +11,7 @@ from vaccine_reservation_scheduler import VaccineReservationScheduler as Vaccine
 
 class TestPart2(unittest.TestCase):
     def testFiveDosesTwoCareGiversFivePatients(self):
+        print("==========testFiveDosesTwoCareGiversFivePatients starts==========")
         with SqlConnectionManager(Server=os.getenv("Server"),
                                       DBname=os.getenv("DBName"),
                                       UserId=os.getenv("UserID"),
@@ -160,15 +161,16 @@ class TestPart2(unittest.TestCase):
                     appointmentIdSet_cg = set((x["VaccineAppointmentId"] for x in schedule_result))
                     appointmentIdSet_va = set((x["VaccineAppointmentId"] for x in appointment_result))
                     self.assertEqual(appointmentIdSet_cg, appointmentIdSet_va)
-
                 clear_tables(sqlClient)
+                print("==========testFiveDosesTwoCareGiversFivePatients ends==========")
             except Exception:
                     # clear the tables if an exception occurred
                 clear_tables(sqlClient)
                 self.fail("Failing FiveDosesTwoCareGiversFivePatients")
+                print("==========testFiveDosesTwoCareGiversFivePatients ends==========")
 
     def testAdd_dose(self):
-
+        print("==========testAdd_dose starts==========")
         with SqlConnectionManager(Server=os.getenv("Server"),
                                   DBname=os.getenv("DBName"),
                                   UserId=os.getenv("UserID"),
@@ -233,10 +235,11 @@ class TestPart2(unittest.TestCase):
                         self.fail("Reserving doses failed")
 
                     clear_tables(sqlClient)
+                    print("==========testAdd_dose ends==========")
                 except Exception:
                     # clear the tables if an exception occurred
                     clear_tables(sqlClient)
-                    self.fail("Reserving doses failed")
+                    self.fail("Reserving doses ends")
 
     def test_ReserveAppt1(self):
         with SqlConnectionManager(Server=os.getenv("Server"),
@@ -278,7 +281,6 @@ class TestPart2(unittest.TestCase):
                     sqltext2 = "SELECT * FROM PATIENTS WHERE PatientId = " + str(patient_a.PatientId) + ";"
                     cursor.execute(sqltext2)
                     rows2 = cursor.fetchall()
-                    #print(rows2)
                     if rows2[0]['VaccineStatus'] != 1:
                         self.fail("Reserving appt. 1 failed")
 
@@ -290,6 +292,7 @@ class TestPart2(unittest.TestCase):
                     self.fail("Reserving appt. 1 failed")
 
     def test_ReserveAppt2(self):
+        print("==========test_ReserveAppt2 starts==========")
         with SqlConnectionManager(Server=os.getenv("Server"),
                                   DBname=os.getenv("DBName"),
                                   UserId=os.getenv("UserID"),
@@ -335,11 +338,12 @@ class TestPart2(unittest.TestCase):
                         self.fail("Reserving appt. 2 failed")
 
                     clear_tables(sqlClient)
-
+                    print("==========test_ReserveAppt2 ends==========")
                 except Exception:
                     # clear the tables if an exception occurred
                     clear_tables(sqlClient)
                     self.fail("Reserving appt. 2 failed")
+                    print("==========test_ReserveAppt2 ends==========")
     
     def test_scheduling(self):
         print("==================test_scheduling START==================")
@@ -530,16 +534,53 @@ class TestPart2(unittest.TestCase):
 
                 patient_a.ScheduleAppointment(cursor)
 
+                # Test schedule doses on vaccines table
+                cursor.execute("select * from vaccines where vaccineName = 'Moderna'")
+                vaccine_result = cursor.fetchall()
+                self.assertEqual(len(vaccine_result), 1)
+                self.assertEqual(vaccine_result[0]["AvailableDoses"], 0)
+                self.assertEqual(vaccine_result[0]["TotalDoses"], 1)
+                self.assertEqual(vaccine_result[0]["ReservedDoses"], 1)
 
+                # Test schedule doses on caregivers table
+                cursor.execute("select * from caregivers")
+                caregiver_result = cursor.fetchall()
+                self.assertEqual(len(caregiver_result), 2)
+                self.assertEqual(caregiver_result[0]["CaregiverName"], 'Hendrik Lenstra')
+                self.assertEqual(caregiver_result[1]["CaregiverName"], 'Leonardo DiCaprio')
 
+                # Test schedule doses on Patients table
+                cursor.execute("select * from patients")
+                patient_result = cursor.fetchall()
+                self.assertEqual(len(patient_result), 1)
+                cursor.execute("select * from patients where VaccineStatus = 2")
+                patient_scheduled_result = cursor.fetchall()
+                self.assertEqual(len(patient_scheduled_result), 1)
+
+                # Test schedule doses on Caregiver Schedule
+                cursor.execute(
+                    "select * from CareGiverSchedule where SlotStatus = 2 and VaccineAppointmentId IS NOT NULL")
+                schedule_result = cursor.fetchall()
+                self.assertEqual(len(schedule_result), 1)
+
+                # Test schedule doses on vaccine appointment
+                cursor.execute(
+                    "select * from VaccineAppointments where SlotStatus = 2 and VaccineAppointmentId IS NOT NULL")
+                appointment_result = cursor.fetchall()
+                self.assertEqual(len(appointment_result), 1)
+
+                # Test the sets of vaccine appointment id from caregiver schedule and vaccine appointment tables are the same
+                appointmentIdSet_cg = set((x["VaccineAppointmentId"] for x in schedule_result))
+                appointmentIdSet_va = set((x["VaccineAppointmentId"] for x in appointment_result))
+                self.assertEqual(appointmentIdSet_cg, appointmentIdSet_va)
+
+                clear_tables(sqlClient)
 
             except(Exception):
                 clear_tables(sqlClient)
                 self.fail("Rollback Error")
             
             print("==================test_only_one_vaccine_available END==================")
-
-
 
 if __name__ == '__main__':
     unittest.main()
