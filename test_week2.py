@@ -475,7 +475,7 @@ class TestPart2(unittest.TestCase):
                     # clear the tables before testing
                     clear_tables(sqlClient)
                     # create a new VaccineCaregiver object
-                    self.vaccine_a = covid(vaccine="Moderna",
+                    vaccine_a = covid(vaccine="Moderna",
                                                     cursor=cursor)
 
                     # I think we are confusing patientstatuscode(0-7) with vaccinestatus(0-4) -> similar prob in donewithvaccine exeption.
@@ -491,10 +491,11 @@ class TestPart2(unittest.TestCase):
                         caregivers[cgid] = cg
 
                 
-                    self.vaccine_a.AddDoses(2, cursor)
+                    vaccine_a.AddDoses(1, cursor)
                     patient_a.ReserveAppointment(vaccRes_a.PutHoldOnAppointmentSlot(cursor), self.vaccine_a, cursor)
                     
                     patient_a.ScheduleAppointment(cursor)
+                    #cursor.connection.commit()
                     cursor.connection.rollback()
 
                     sqltext1 = "SELECT * FROM VaccineAppointments WHERE VaccineAppointmentId  = "+ \
