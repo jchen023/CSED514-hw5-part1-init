@@ -342,6 +342,7 @@ class TestPart2(unittest.TestCase):
                     self.fail("Reserving appt. 2 failed")
     
     def test_scheduling(self):
+        print("==================test_scheduling START==================")
         with SqlConnectionManager(Server=os.getenv("Server"),
                                   DBname=os.getenv("DBName"),
                                   UserId=os.getenv("UserID"),
@@ -417,8 +418,10 @@ class TestPart2(unittest.TestCase):
                 except Exception:
                     clear_tables(sqlClient)
                     self.fail("Scheduling Vaccine Appointment failed catastrophically")
+                print("==================test_scheduling END==================")
 
     def test_Schedule_Third_Vaccine_Exception(self):
+        print("==================test_Schedule_Third_Vaccine_Exception START==================")
         with SqlConnectionManager(Server=os.getenv("Server"),
                                   DBname=os.getenv("DBName"),
                                   UserId=os.getenv("UserID"),
@@ -453,8 +456,10 @@ class TestPart2(unittest.TestCase):
                 except Exception:
                     clear_tables(sqlClient)
                     self.fail("Vaccine Status Code Error")
+                print("==================test_Schedule_Third_Vaccine_Exception END==================")
     
     def test_only_one_vaccine_available(self):
+        print("==================test_only_one_vaccine_available START==================")
         with SqlConnectionManager(Server=os.getenv("Server"),
                                   DBname=os.getenv("DBName"),
                                   UserId=os.getenv("UserID"),
@@ -531,6 +536,8 @@ class TestPart2(unittest.TestCase):
             except(Exception):
                 clear_tables(sqlClient)
                 self.fail("Rollback Error")
+            
+            print("==================test_only_one_vaccine_available END==================")
 
 
 
