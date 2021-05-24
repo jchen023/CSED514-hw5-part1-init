@@ -17,7 +17,7 @@ class TestVaccineFunction(unittest.TestCase):
                     # clear the tables before testing
                     clear_tables(sqlClient)
                     # create a new VaccineCaregiver object
-                    self.vaccine_a = covid(vaccine="Pfizer",
+                    vaccine_a = covid(vaccine="Pfizer",
                                                     cursor=cursor)
                     # check if the patient is correctly inserted into the database
                     sqlQuery = '''
@@ -49,7 +49,7 @@ class TestVaccineFunction(unittest.TestCase):
                     # clear the tables before testing
                     clear_tables(sqlClient)
                     # create a new VaccineCaregiver object
-                    self.vaccine_a = covid(vaccine="MicroChipInsideYou",
+                    vaccine_a = covid(vaccine="MicroChipInsideYou",
                                                     cursor=cursor)
                     # check if the patient is correctly inserted into the database
                     sqlQuery = '''
@@ -57,12 +57,10 @@ class TestVaccineFunction(unittest.TestCase):
                                 FROM Vaccines;
                                '''
 
-                    #self.vaccine_a.AddDoses(4, cursor)
-
                     cursor.execute(sqlQuery)
                     rows = cursor.fetchall()
                     
-                    if rows[0]['VaccineName'] != '':
+                    if not rows:
                         self.fail("Vaccine naming failed")
                     
                     clear_tables(sqlClient)
@@ -83,7 +81,7 @@ class TestVaccineFunction(unittest.TestCase):
                     # clear the tables before testing
                     clear_tables(sqlClient)
                     # create a new VaccineCaregiver object
-                    self.vaccine_a = covid(vaccine="Moderna",
+                    vaccine_a = covid(vaccine="Moderna",
                                                     cursor=cursor)
                     # check if the patient is correctly inserted into the database
                     sqlQuery = '''
@@ -92,7 +90,7 @@ class TestVaccineFunction(unittest.TestCase):
                                 WHERE VaccineName = 'Moderna'
                                 '''
 
-                    self.vaccine_a.AddDoses(4, cursor)
+                   vaccine_a.AddDoses(4, cursor)
 
                     cursor.execute(sqlQuery)
                     rows = cursor.fetchall()
@@ -118,7 +116,7 @@ class TestVaccineFunction(unittest.TestCase):
                     # clear the tables before testing
                     clear_tables(sqlClient)
                     # create a new VaccineCaregiver object
-                    self.vaccine_a = covid(vaccine="Moderna",
+                    vaccine_a = covid(vaccine="Moderna",
                                                     cursor=cursor)
                     # check if the patient is correctly inserted into the database
                     sqlQuery = '''
@@ -127,7 +125,7 @@ class TestVaccineFunction(unittest.TestCase):
                                 WHERE VaccineName = 'Moderna'
                                 '''
 
-                    self.vaccine_a.AddDoses(-4, cursor)
+                    vaccine_a.AddDoses(-4, cursor)
 
                     cursor.execute(sqlQuery)
                     rows = cursor.fetchall()
@@ -153,7 +151,7 @@ class TestVaccineFunction(unittest.TestCase):
                     # clear the tables before testing
                     clear_tables(sqlClient)
                     # create a new VaccineCaregiver object
-                    self.vaccine_a = covid(vaccine="AstraZeneca",
+                    vaccine_a = covid(vaccine="AstraZeneca",
                                                     cursor=cursor)
                     # check if the patient is correctly inserted into the database
                     sqlQuery = '''
@@ -162,8 +160,8 @@ class TestVaccineFunction(unittest.TestCase):
                                 WHERE VaccineName = 'AstraZeneca'
                                 '''
 
-                    self.vaccine_a.AddDoses(4, cursor)
-                    self.vaccine_a.ReserveDoses(2, cursor)
+                    vaccine_a.AddDoses(4, cursor)
+                    vaccine_a.ReserveDoses(2, cursor)
 
                     cursor.execute(sqlQuery)
                     rows = cursor.fetchall()
@@ -189,7 +187,7 @@ class TestVaccineFunction(unittest.TestCase):
                     # clear the tables before testing
                     clear_tables(sqlClient)
                     # create a new VaccineCaregiver object
-                    self.vaccine_a = covid(vaccine="AstraZeneca",
+                    vaccine_a = covid(vaccine="AstraZeneca",
                                            cursor=cursor)
                     # check if the patient is correctly inserted into the database
                     sqlQuery = '''
@@ -198,8 +196,8 @@ class TestVaccineFunction(unittest.TestCase):
                                 WHERE VaccineName = 'AstraZeneca'
                                 '''
 
-                    self.vaccine_a.AddDoses(4, cursor)
-                    self.vaccine_a.ReserveDoses(-2, cursor)
+                    vaccine_a.AddDoses(4, cursor)
+                    vaccine_a.ReserveDoses(-2, cursor)
 
                     cursor.execute(sqlQuery)
                     rows = cursor.fetchall()
@@ -225,7 +223,7 @@ class TestVaccineFunction(unittest.TestCase):
                     # clear the tables before testing
                     clear_tables(sqlClient)
                     # create a new VaccineCaregiver object
-                    self.vaccine_a = covid(vaccine="AstraZeneca",
+                    vaccine_a = covid(vaccine="AstraZeneca",
                                                     cursor=cursor)
                     # check if the patient is correctly inserted into the database
                     sqlQuery = '''
@@ -235,7 +233,7 @@ class TestVaccineFunction(unittest.TestCase):
                                 AND MaxStorageTemperature > 36
                                 '''
 
-                    self.vaccine_a.AddDoses(1, cursor)
+                    vaccine_a.AddDoses(1, cursor)
 
                     cursor.execute(sqlQuery)
                     rows = cursor.fetchall()
@@ -262,7 +260,7 @@ class TestVaccineFunction(unittest.TestCase):
                     # clear the tables before testing
                     clear_tables(sqlClient)
                     # create a new VaccineCaregiver object
-                    self.vaccine_a = covid(vaccine="Moderna",
+                    vaccine_a = covid(vaccine="Moderna",
                                                     cursor=cursor)
                     # check if the patient is correctly inserted into the database
                     sqlQuery = '''
@@ -272,7 +270,7 @@ class TestVaccineFunction(unittest.TestCase):
                                 AND MaxStorageTemperature > -20
                                 '''
 
-                    self.vaccine_a.AddDoses(1, cursor)
+                    vaccine_a.AddDoses(1, cursor)
 
                     cursor.execute(sqlQuery)
                     rows = cursor.fetchall()
@@ -299,7 +297,7 @@ class TestVaccineFunction(unittest.TestCase):
                     # clear the tables before testing
                     clear_tables(sqlClient)
                     # create a new VaccineCaregiver object
-                    self.vaccine_a = covid(vaccine="Pfizer",
+                    vaccine_a = covid(vaccine="Pfizer",
                                                     cursor=cursor)
                     # check if the patient is correctly inserted into the database
                     sqlQuery = '''
@@ -309,7 +307,7 @@ class TestVaccineFunction(unittest.TestCase):
                                 AND MaxStorageTemperature > -70
                                 '''
 
-                    self.vaccine_a.AddDoses(1, cursor)
+                    vaccine_a.AddDoses(1, cursor)
 
                     cursor.execute(sqlQuery)
                     rows = cursor.fetchall()
@@ -335,7 +333,7 @@ class TestVaccineFunction(unittest.TestCase):
                     # clear the tables before testing
                     clear_tables(sqlClient)
                     # create a new VaccineCaregiver object
-                    self.vaccine_a = covid(vaccine="J&J",
+                    vaccine_a = covid(vaccine="J&J",
                                                     cursor=cursor)
                     # check if the patient is correctly inserted into the database
                     sqlQuery = '''
@@ -345,7 +343,7 @@ class TestVaccineFunction(unittest.TestCase):
                                 AND MaxStorageTemperature > 90
                                 '''
 
-                    self.vaccine_a.AddDoses(1, cursor)
+                    vaccine_a.AddDoses(1, cursor)
 
                     cursor.execute(sqlQuery)
                     rows = cursor.fetchall()

@@ -91,7 +91,6 @@ class TestPart2(unittest.TestCase):
                     patient_scheduled_result = cursor.fetchall()
                     self.assertEqual(len(patient_scheduled_result), 1 if i <= 2 else 0)
 
-
                     # Test reserve doses on Caregiver Schedule
                     cursor.execute("select * from CareGiverSchedule where SlotStatus = 1 and VaccineAppointmentId IS NOT NULL")
                     schedule_result = cursor.fetchall()
@@ -193,12 +192,10 @@ class TestPart2(unittest.TestCase):
                     cursor.execute(sqlQuery)
                     rows = cursor.fetchall()
 
-
-                    if rows[0]['TotalDoses'] != 4:
+                    if len(rows) != 1 and rows[0]['TotalDoses'] != 4:
                         self.fail("Adding doses failed")
 
                     clear_tables(sqlClient)
-                    #print('opps')
                 except Exception:
                     # clear the tables if an exception occurred
                     clear_tables(sqlClient)
@@ -269,11 +266,9 @@ class TestPart2(unittest.TestCase):
                     sqlQuery = "SELECT * FROM VaccineAppointments WHERE VaccineName = 'Pfizer' AND PatientId = "+\
                             str(patient_a.PatientId) +";"
 
-                    #print('in')
                     self.vaccine_a.AddDoses(1, cursor)
                     patient_a.ReserveAppointment( vaccRes_a.PutHoldOnAppointmentSlot(cursor), self.vaccine_a, cursor)
 
-                    #print('finally')
                     cursor.execute(sqlQuery)
                     rows = cursor.fetchall()
 
@@ -322,25 +317,21 @@ class TestPart2(unittest.TestCase):
                     sqlQuery = "SELECT * FROM VaccineAppointments WHERE VaccineName = 'Pfizer' AND PatientId = "+\
                             str(patient_a.PatientId) +";"
 
-                    #print('in')
                     self.vaccine_a.AddDoses(2, cursor)
 
                     patient_a.ReserveAppointment( vaccRes_a.PutHoldOnAppointmentSlot(cursor), self.vaccine_a, cursor)
-                    #print('finally')
-
 
                     cursor.execute(sqlQuery)
                     rows = cursor.fetchall()
 
-
-                    if rows[1]['SlotStatus'] != 1 or len(rows) != 2:
+                    if not rows or rows[1]['SlotStatus'] != 1 or len(rows) != 2:
                         self.fail("Reserving appt. 2 failed")
 
                     sqltext2 = "SELECT * FROM PATIENTS WHERE PatientId = " + str(patient_a.PatientId) + ";"
                     cursor.execute(sqltext2)
                     rows2 = cursor.fetchall()
                     #print(rows2)
-                    if rows2[0]['VaccineStatus'] != 1:
+                    if not rows2 or rows2[0]['VaccineStatus'] != 1:
                         self.fail("Reserving appt. 2 failed")
 
                     clear_tables(sqlClient)
@@ -377,49 +368,48 @@ class TestPart2(unittest.TestCase):
                     self.vaccine_a.AddDoses(2, cursor)
                     patient_a.ReserveAppointment(vaccRes_a.PutHoldOnAppointmentSlot(cursor), self.vaccine_a, cursor)
                     patient_a.ScheduleAppointment(cursor)
-                    
 
                     # check if the appointment get scheduled correctly
                     sqlQuery1 = "SELECT * FROM CareGiverSchedule WHERE CaregiverSlotSchedulingId = " \
                             + str(patient_a.firstCareGiverSchedulingId) + "and SlotStatus = 2;"
                     cursor.execute(sqlQuery1)
                     rows1 = cursor.fetchall()
-                    if (rows1 == []):
+                    if not rows1:
                         self.fail('Caregiver Schedule not properly added')
                     ###################################
                     sqlQuery2 = "SELECT * FROM Patients WHERE PatientId = " + str(patient_a.PatientId) + \
                                "AND VaccineStatus = 2;"
                     cursor.execute(sqlQuery2)
                     rows2 =cursor.fetchall()
-                    if (rows2 == []):
+                    if not rows2:
                         self.fail('Patient not properly updated')
                     ###################################
                     sqlQuery3 = "SELECT * FROM VaccineAppointments WHERE VaccineAppointmentId  = "+ \
                            str(patient_a.firstAppointmentId) + " AND SlotStatus = 2;"
                     cursor.execute(sqlQuery3)
                     rows3 =cursor.fetchall()
-                    if (rows3 == []):
+                    if not rows3:
                         self.fail('Vaccine Appointment not properly updated')
                     #--------------------------------------------------------------------------------------------------------
                     sqlQuery4 = "SELECT * FROM CareGiverSchedule WHERE CaregiverSlotSchedulingId = " \
                             + str(patient_a.secondCareGiverSchedulingId) + "and SlotStatus = 2;"
                     cursor.execute(sqlQuery1)
                     rows4 = cursor.fetchall()
-                    if (rows4 == []):
+                    if not rows4:
                         self.fail('Caregiver Schedule not properly added')
                     ###################################
                     sqlQuery5 = "SELECT * FROM Patients WHERE PatientId = " + str(patient_a.PatientId) + \
                                "AND VaccineStatus = 2;"
                     cursor.execute(sqlQuery1)
                     rows5 = cursor.fetchall()
-                    if (rows5 == []):
+                    if not rows5:
                         self.fail('Patient not properly updated')
                     ###################################
                     sqlQuery6 = "SELECT * FROM VaccineAppointments WHERE VaccineAppointmentId  = "+ \
                            str(patient_a.firstAppointmentId) + " AND SlotStatus = 2;"
                     cursor.execute(sqlQuery1)
                     rows6 = cursor.fetchall()
-                    if (rows6 == []):
+                    if not rows6:
                         self.fail('Vaccine Appointment not properly updated')
                     ###################################
 
@@ -428,7 +418,7 @@ class TestPart2(unittest.TestCase):
                     clear_tables(sqlClient)
                     self.fail("Scheduling Vaccine Appointment failed catastrophically")
 
-    def test_Greed(self):
+    def test_Schedule_Third_Vaccine_Exception(self):
         with SqlConnectionManager(Server=os.getenv("Server"),
                                   DBname=os.getenv("DBName"),
                                   UserId=os.getenv("UserID"),
@@ -441,7 +431,6 @@ class TestPart2(unittest.TestCase):
                     self.vaccine_a = covid(vaccine="Pfizer",
                                                     cursor=cursor)
 
-                    # I think we are confusing patientstatuscode(0-7) with vaccinestatus(0-4) -> similar prob in donewithvaccine exeption.
                     patient_a = patient('Larry Ellison', 7, cursor=cursor)
                     vaccRes_a = VaccineReserve()
 
@@ -455,7 +444,7 @@ class TestPart2(unittest.TestCase):
 
                     self.vaccine_a.AddDoses(2, cursor)
                     
-                    with self.assertRaises(DoneWithVaccine):  # replace exception with DoneWithVaccine
+                    with self.assertRaises(DoneWithVaccine):
                         patient_a.ReserveAppointment(vaccRes_a.PutHoldOnAppointmentSlot(cursor), self.vaccine_a, cursor)
                     
                     # if patient_a.PatientStatusCode >= 7:
@@ -465,59 +454,83 @@ class TestPart2(unittest.TestCase):
                     clear_tables(sqlClient)
                     self.fail("Vaccine Status Code Error")
     
-    def test_rollback(self):
+    def test_only_one_vaccine_available(self):
         with SqlConnectionManager(Server=os.getenv("Server"),
                                   DBname=os.getenv("DBName"),
                                   UserId=os.getenv("UserID"),
                                   Password=os.getenv("Password")) as sqlClient:
-            with sqlClient.cursor(as_dict=True) as cursor:
-                try:
-                    # clear the tables before testing
-                    clear_tables(sqlClient)
-                    # create a new VaccineCaregiver object
-                    vaccine_a = covid(vaccine="Moderna",
-                                                    cursor=cursor)
+            cursor = sqlClient.cursor(as_dict=True)
+            db_cursor = sqlClient.cursor(as_dict=True)
+            try:
+                # clear the tables before testing
+                clear_tables(sqlClient)
+                # create a new VaccineCaregiver object
+                vaccine_a = covid(vaccine="Moderna",
+                                                cursor=db_cursor)
 
-                    # I think we are confusing patientstatuscode(0-7) with vaccinestatus(0-4) -> similar prob in donewithvaccine exeption.
-                    patient_a = patient('Hugh Heffner', 0, cursor=cursor)
-                    vaccRes_a = VaccineReserve()
+                patient_a = patient('Hugh Heffner', 0, cursor=db_cursor)
+                vaccRes_a = VaccineReserve()
 
-                    caregiversList = []
-                    caregiversList.append(VaccineCaregiver('Hendrik Lenstra', cursor))
-                    caregiversList.append(VaccineCaregiver('Leonardo DiCaprio', cursor))
-                    caregivers = {}
-                    for cg in caregiversList:
-                        cgid = cg.caregiverId
-                        caregivers[cgid] = cg
-
-                
-                    vaccine_a.AddDoses(1, cursor)
-                    patient_a.ReserveAppointment(vaccRes_a.PutHoldOnAppointmentSlot(cursor), self.vaccine_a, cursor)
-                    
-                    patient_a.ScheduleAppointment(cursor)
-                    #cursor.connection.commit()
-                    cursor.connection.rollback()
-
-                    sqltext1 = "SELECT * FROM VaccineAppointments WHERE VaccineAppointmentId  = "+ \
-                           str(patient_a.firstAppointmentId) + ";"
-                    cursor.execute(sqltext1)
-                    rows1 = cursor.fetchall()
-                    print(rows1)
-
-                    sqltext2 = "SELECT * FROM VaccineAppointments WHERE VaccineAppointmentId  = "+ \
-                           str(patient_a.secondAppointmentId) + ";"
-                    cursor.execute(sqltext2)
-                    rows2 = cursor.fetchall()
-                    print(rows2)
-
-                    #cursor.rollback()
-                except(Exception):
-                    clear_tables(sqlClient)
-                    self.fail("Rollback Error")
+                caregiversList = []
+                caregiversList.append(VaccineCaregiver('Hendrik Lenstra', db_cursor))
+                caregiversList.append(VaccineCaregiver('Leonardo DiCaprio', db_cursor))
+                caregivers = {}
+                for cg in caregiversList:
+                    cgid = cg.caregiverId
+                    caregivers[cgid] = cg
 
 
+                vaccine_a.AddDoses(1, cursor)
+                patient_a.ReserveAppointment(vaccRes_a.PutHoldOnAppointmentSlot(cursor), vaccine_a, db_cursor)
 
-        
+                # Test reserve doses on vaccines table
+                cursor.execute("select * from vaccines where vaccineName = 'Moderna'")
+                vaccine_result = cursor.fetchall()
+                self.assertEqual(len(vaccine_result), 1)
+                self.assertEqual(vaccine_result[0]["AvailableDoses"], 0)
+                self.assertEqual(vaccine_result[0]["TotalDoses"], 1)
+                self.assertEqual(vaccine_result[0]["ReservedDoses"], 1)
+
+                # Test reserve doses on caregivers table
+                cursor.execute("select * from caregivers")
+                caregiver_result = cursor.fetchall()
+                self.assertEqual(len(caregiver_result), 2)
+                self.assertEqual(caregiver_result[0]["CaregiverName"], 'Hendrik Lenstra')
+                self.assertEqual(caregiver_result[1]["CaregiverName"], 'Leonardo DiCaprio')
+
+                # Test reserve doses on Patients table
+                cursor.execute("select * from patients")
+                patient_result = cursor.fetchall()
+                self.assertEqual(len(patient_result), 1)
+                cursor.execute("select * from patients where VaccineStatus = 1")
+                patient_scheduled_result = cursor.fetchall()
+                self.assertEqual(len(patient_scheduled_result), 1)
+
+                # Test reserve doses on Caregiver Schedule
+                cursor.execute(
+                    "select * from CareGiverSchedule where SlotStatus = 1 and VaccineAppointmentId IS NOT NULL")
+                schedule_result = cursor.fetchall()
+                self.assertEqual(len(schedule_result), 1)
+
+                # Test reserve doses on vaccine appointment
+                cursor.execute(
+                    "select * from VaccineAppointments where SlotStatus = 1 and VaccineAppointmentId IS NOT NULL")
+                appointment_result = cursor.fetchall()
+                self.assertEqual(len(appointment_result), 1)
+
+                # Test the sets of vaccine appointment id from caregiver schedule and vaccine appointment tables are the same
+                appointmentIdSet_cg = set((x["VaccineAppointmentId"] for x in schedule_result))
+                appointmentIdSet_va = set((x["VaccineAppointmentId"] for x in appointment_result))
+                self.assertEqual(appointmentIdSet_cg, appointmentIdSet_va)
+
+                patient_a.ScheduleAppointment(cursor)
+
+
+
+
+            except(Exception):
+                clear_tables(sqlClient)
+                self.fail("Rollback Error")
 
 
 

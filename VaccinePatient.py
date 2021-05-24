@@ -41,8 +41,9 @@ class VaccinePatient:
 
 
     def ReserveAppointment(self, CaregiverSchedulingID, Vaccine, cursor):
+        # We are allowing scheduling of the first appointment, even when the second appointment is not available
         try:
-            if self.PatientStatusCode >= 7:  # probably replace 4 with 7
+            if self.PatientStatusCode >= 4:
                 raise DoneWithVaccine
 
             if self.PatientStatusCode == 0:
